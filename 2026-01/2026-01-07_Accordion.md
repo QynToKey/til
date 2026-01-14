@@ -1,4 +1,4 @@
-- 「アコーディオンUI」の実装
+- JavaScriptで「アコーディオンUI」を試作
 
   - `details`タグ
     - `summary`: 項目の初期値を設定できる
@@ -16,5 +16,5 @@
     - `transform: rotate(45deg);`: `+`を回転させて閉じるボタンに
     - `translation: transform 0.3s;`: ふわっと表示させる
     - `@keyframes`: アニメーションをカスタマイズ
-    
+
   - 学習後にサロンHPに以上を実装
