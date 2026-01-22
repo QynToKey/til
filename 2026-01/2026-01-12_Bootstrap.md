@@ -1,4 +1,4 @@
-- `Bootstrap`について
+## [Bootstrap](https://getbootstrap.com/)について
 
   - **`container`クラスの挙動**: Docs > Layout > Containers> [How They work](https://getbootstrap.com/docs/5.3/layout/containers/#how-they-work)
     - 自動でウィンドウ幅に応じてコンテンツを表示する
@@ -38,6 +38,8 @@
 
   - **ナビゲーション**: Docs > Components > [Navbar](https://getbootstrap.com/docs/5.3/components/navbar/)
 
+
+## `Git` tips
 
 - `Git` の状況確認 *（「何かおかしい」と感じたとき）*
     ```
