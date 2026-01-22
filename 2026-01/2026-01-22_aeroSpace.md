@@ -8,3 +8,8 @@
   **accordion**のレイアウト切り替え: `option + ,`
   **Workspace**の切り替え: `option + [workspace名]`
   **Workspace**への移動: `option + shift + [workspace名]`
+
+
+#### 試してみた所感
+  - そもそもノートPCは画面が小さいので、快適さより制約が勝る印象。
+  - 特定の作業環境に特化してカスタマイズするのはアリかも。
