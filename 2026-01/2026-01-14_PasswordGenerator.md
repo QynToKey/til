@@ -1,4 +1,4 @@
-- JavaScriptで「パスワードジェネレーター」を試作
+## JavaScriptで「[パスワードジェネレーター](https://github.com/QynToKey/MyPasswordApp)」を試作
 
   - `legend`タグ: HTMLの要素で、その親要素`fieldset`の内容やキャプションを表す。
 
@@ -40,7 +40,7 @@
     ```
 
 
-- `Figma`
+## `Figma`
 
   - プラグイン
 
