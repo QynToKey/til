@@ -44,13 +44,12 @@
   }
   ```
 
-- **Dockerfile は書いていない**
-- 既製の Ruby 環境イメージをそのまま使う
-- VS Code が内部的に：
-
-  - `docker compose build`
-  - `docker compose up -d`
-	を実行している（自分では叩かない）
+  - **Dockerfile は書かない**
+  - 既製の Ruby 環境イメージをそのまま使っている
+  - VS Code が内部的に：
+    - Docker イメージを取得（`docker pull`）
+    - コンテナを起動（`docker run`）
+    している（自分では叩かない）
 
 ---
 
@@ -112,7 +111,8 @@
 
   - `Dockerfile`を用意しなくても、Docker を **IDE の実装詳細**にする仕組み
 
-  - **Dockerコマンドは不要**
+  - `Dockerコマンド`を直接叩く必要がない（`vscode`が代行して裏で動いている）
+
 
 ####  Dev Containers の終了と再開
 
@@ -127,7 +127,7 @@
 
   - Dev Container 内は「まっさらな Linux」状態なので、GitHub からは「別の PC」として扱われる 🤛 *「SSH 鍵なし」の状態*
 
-  - そのため、`git push`するには「**SSH 公開鍵認証を使わない方式**」に切り替える必要がある
+  - `git push`するために、今回は「**SSH 公開鍵認証を使わない方式**」に切り替えた <br>🤛 *`SSH認証`でも可能だが、初学者にはやや難解*
 
     - 手順
     ```
@@ -149,14 +149,14 @@
 ### HTTPS と SSH
 
 - `HTTPS` は ⭕️「**OAuth / Token 認証**」 ❌「認証なし」
-- `SSH` は「**SSH 公開鍵認証**]
+- `SSH` は「**SSH 公開鍵認証**」
 
 🤛 *`HTTPS`では`VS Code`が認証を仲介しているため、パスワードを毎回聞かれないだけ*
 
 
 ---
 
-## Dockerfileを書く構成との違い（整理）
+### Dockerfileを書く構成との違い（整理）
 
 | 観点         | Dev Containers | docker-compose |
 | ---------- | -------------- | -------------- |
@@ -165,3 +165,5 @@
 | Docker操作   | 不要             | 必須             |
 | 学習コスト      | 低い             | 高い             |
 | 制御性        | 低め             | 高い             |
+
+🤛 *同じ Docker でも「Dockerfileを書く構成」とは責務分担がまったく異なる*
