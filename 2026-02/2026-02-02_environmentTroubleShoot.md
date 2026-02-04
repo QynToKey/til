@@ -20,7 +20,7 @@
     docker ps -a
   ```
 
-  🤛 *VS Code が古いコンテナを参照している場合は `Rebuild` や `Reopen in Container` を試す*
+  👉 *VS Code が古いコンテナを参照している場合は `Rebuild` や `Reopen in Container` を試す*
 
 ### 復旧手順：
 
@@ -73,7 +73,7 @@
     bin/rails server
   ```
 
-  🤛 *ブラウザで http://localhost:3000 が開けば 環境構築完了*
+  👉 *ブラウザで http://localhost:3000 が開けば 環境構築完了*
 
 ---
 
