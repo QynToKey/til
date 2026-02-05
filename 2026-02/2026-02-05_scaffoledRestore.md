@@ -53,10 +53,15 @@ rails g scaffold User name:string email:string
   ```
 
 ### 教訓
-
 <br> ⚠️ **`main`で試行錯誤しないこと❗️**
 
 - 実務・検証用途では**お試し用ブランチを切って試す**べし
 
 - もしくは `--pretend` オプションを活用
+
+```
+git switch testScaffold
+rails g scaffold User name:string email:string
+git diff main..testScaffold
+```
 ---
