@@ -9,24 +9,29 @@
 
   3. **アソシエーション** および **バリデーション** を設定
 
-    ```ruby
-    class User < ApplicationRecord
-      has_many :microposts
-    end
-    ```
+  ```bash
+  # users_rb
 
-    ```ruby
-    class Micropost < ApplicationRecord
-      belongs_to :user
-      validates :content, length: { maximum: 140 }
-    end
-    ```
+  class User < ApplicationRecord
+    has_many :microposts
+  end
+  ```
+
+  ```bash
+  # microposts_rb
+
+  class Micropost < ApplicationRecord
+    belongs_to :user
+    validates :content, length: { maximum: 140 }
+  end
+  ```
 
   4. ブラウザからテストデータを作成
 
   5. `rails console` で実装状況を確認
 
-    - 成功例
+  - 成功例
+
     ```bash
     first_user = User.first
     first_user.microposts # => Micropost の配列が返る
