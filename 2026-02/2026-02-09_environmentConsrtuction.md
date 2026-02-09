@@ -39,3 +39,21 @@
 | 課題・教材・雛形 | Use this template |
 | チーム開発 | clone |
 | 完全新規プロジェクト | `git init` |
+
+---
+
+### VS Code ターミナルの運用例
+
+#### 実務的なルール
+
+- サーバーを起動しているターミナルは閉じない
+
+  <br>👉 *止めたいときは `Ctrl + C` で明示的に止める*
+
+- 複数ターミナルに名前をつけて管理する
+  - 構成例
+  | ターミナル名 | 稼働させるコマンド例 |
+  | --- | --- |
+  | rails-server |  `rails server` |
+  | console |  `rails c` |
+  | work  |  `git status`, `bin/rails db:migrate` |
