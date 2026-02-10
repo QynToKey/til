@@ -1,6 +1,6 @@
-### Rails tips
+## Rails tips
 
-#### Rail で使える短縮形のコマンド例
+### Rails で使える短縮形のコマンド例
 
   | 完全なコマンド | 短縮形 |
   | --- | --- |
@@ -11,7 +11,7 @@
   | `$ rails test`	| `$ rails t` |
   | `$ bundle install`	| `$ bundle` |
 
-#### 自動生成したファイルを元に戻す
+### 自動生成したファイルを元に戻す
 
 - **生成**`generate` → **取り消し**`destroy`
 
@@ -20,9 +20,11 @@
     $ rails generate controller StaticPages home help
 
   # 対応する取り消しコマンド
-    $ rails destroy  controller StaticPages home help
+    $ rails destroy  controller StaticPages
   ```
 
+  👉 *`destroy `は `generate` の逆操作として、自動生成されたファイルを削除する*
+  
   👉 *モデル及びコントローラーについては「引数」を省略できる*
 
 - **マイグレーション**の変更を元に戻す場合
@@ -38,4 +40,4 @@
     $ rails db:migrate VERSION=0
   ```
 
-  👉 *通常は`VERSION=20220407092210`のようにマイグレーションの作成日時のみ指定可能だが、例外的に`VERSION=0`とシリアル番号で初期化できる*
+  👉 *通常は`VERSION=20220407092210`のようにマイグレーションの「タイムスタンプ」を指定するが、例外的に`VERSION=0`と指定すると全マイグレーション適用前（初期状態）まで戻せる*
