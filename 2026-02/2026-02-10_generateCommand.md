@@ -1,17 +1,17 @@
-## Rails tips
+# Rails tips
 
-### Rails で使える短縮形のコマンド例
+## Rails で使える短縮形のコマンド例
 
   | 完全なコマンド | 短縮形 |
   | --- | --- |
-  | `$ rails server`	| `$ rails s` |
-  | `$ rails console`	| `$ rails c` |
-  | `$ rails generate`	| `$ rails g` |
-  | `$ rails destroy`	| `$ rails d` |
-  | `$ rails test`	| `$ rails t` |
-  | `$ bundle install`	| `$ bundle` |
+  | `$ rails server` | `$ rails s` |
+  | `$ rails console` | `$ rails c` |
+  | `$ rails generate` | `$ rails g` |
+  | `$ rails destroy` | `$ rails d` |
+  | `$ rails test` | `$ rails t` |
+  | `$ bundle install` | `$ bundle` |
 
-### 自動生成したファイルを元に戻す
+## 自動生成したファイルを元に戻す
 
 - **生成**`generate` → **取り消し**`destroy`
 
@@ -23,8 +23,8 @@
     $ rails destroy  controller StaticPages
   ```
 
-  👉 *`destroy `は `generate` の逆操作として、自動生成されたファイルを削除する*
-  
+  👉 *`destroy`は `generate` の逆操作として、自動生成されたファイルを削除する*
+
   👉 *モデル及びコントローラーについては「引数」を省略できる*
 
 - **マイグレーション**の変更を元に戻す場合
