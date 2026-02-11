@@ -6,7 +6,8 @@
 
 1. `Use this template` → 自分のリポジトリ作成（`fork`ではなく`template`を使用）
 2. そのリポジトリを `git clone`
-  <br>👉 *`git init` は不要 (`git init` は 「Git 管理されていないディレクトリ」を新規に管理したいときだけ使う)*
+
+    👉 *`git init` は不要 (`git init` は 「Git 管理されていないディレクトリ」を新規に管理したいときだけ使う)*
 
 #### clone
 
@@ -16,7 +17,9 @@
 #### fork
 
 - 他人のリポジトリを **自分のアカウントにコピー**
-  👉 *`GitHub`の機能 (`Git`の機能ではない)*
+
+   👉 *`GitHub`の機能 (`Git`の機能ではない)*
+
 - **元リポジトリとの親子関係**が GitHub 上に残る
 
 #### Use this template
@@ -27,6 +30,7 @@
 
 
 ##### クローンとフォークの違い
+
 | 観点 | clone | fork |
 | --- | --- | --- |
 | 実行場所 | ローカル | リモート (GitHub 上) |
@@ -35,6 +39,7 @@
 | OSS 開発での利用 | △（閲覧・検証） | ◎（貢献） |
 
 ##### 使い分けのイメージ
+
 | 目的 | Git操作 |
 | --- | --- |
 | OSS に貢献したい | fork |
@@ -49,7 +54,8 @@
 #### 実務的なルール
 
 - サーバーを起動しているターミナルは閉じない
-  <br>👉 *止めたいときは `Ctrl + C` で明示的に止める*
+
+    👉 *止めたいときは `Ctrl + C` で明示的に止める*
 
 - 複数ターミナルに名前をつけて管理する
 
@@ -57,6 +63,6 @@
 
     | ターミナル名 | 稼働させるコマンド例 |
     | --- | --- |
-    | rails-server |  `rails server` |
-    | console |  `rails c` |
-    | work  |  `git status`, `bin/rails db:migrate` |
+    | rails-server | `rails server` |
+    | console | `rails c` |
+    | work  | `git status`, `bin/rails db:migrate` |
