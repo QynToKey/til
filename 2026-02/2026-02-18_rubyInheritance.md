@@ -1,0 +1,111 @@
+# Ruby の継承チェーン
+
+Ruby のオブジェクトは `BasicObject` を祖先に持つ
+
+## 1️⃣ 何も書かないクラス
+
+```ruby
+class A
+end
+```
+
+このときの「継承ツリー」：
+
+  ```text
+  BasicObject
+    ↑
+    Object
+    ↑
+    A
+  ```
+
+  👉 *デフォルトで `Object` を継承する*
+
+---
+
+## 2️⃣ 上位構造
+
+IRBで確認：
+
+```ruby
+Object.superclass
+# => BasicObject
+
+Class.superclass
+# => Module
+```
+
+このときの「継承ツリー」：
+
+  ```text
+  BasicObject
+    ↑
+    Object
+    ↑
+    Module
+    ↑
+    Class
+  ```
+
+---
+
+## 3️⃣ Class もオブジェクト
+
+`Class` もまた `BasicObject` を祖先に持つオブジェクトである
+
+```ruby
+User.class
+# => Class
+```
+
+- このとき `class` は `Class` のインスタンス
+- `new` は `Class` に定義されている
+- 定義メソッドは「継承チェーン」を上にたどって探索される（メソッド探索は上から順に見つかった時点で停止する）
+
+```text
+特異クラス（eigenclass）
+↓
+クラス
+↓
+include された module
+↓
+親クラス
+↓
+...
+```
+
+---
+
+## 4️⃣ initialize の挙動
+
+- `new` は `Class` に定義されている
+- `new` の中で `initialize` が呼ばれる
+- `initialize` がなければ祖先を探す
+
+---
+
+## 5️⃣ Railsとの接続イメージ
+
+```ruby
+class User < ApplicationRecord
+```
+
+このとき `User` は巨大な継承チェーンの一部
+
+  ```text
+  User
+    ↑
+  ApplicationRecord
+    ↑
+  ActiveRecord::Base
+    ↑
+  ...
+    ↑
+  Object
+    ↑
+  BasicObject
+  ```
+
+  👉 *`Rails` はこの「継承構造」を利用して機能を提供している*
+
+---
