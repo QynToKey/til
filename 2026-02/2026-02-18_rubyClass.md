@@ -226,6 +226,94 @@
   => true
   ```
 
+#### コントローラークラス の継承階層
+
+```ruby
+>>controller = StaticPagesController.new
+=> #<StaticPagesController:0x000000000df458>
+
+>> controller.class
+=> StaticPagesController
+
+>> controller.class.superclass
+=> ApplicationController
+
+>> controller.class.superclass.superclass
+=> ActionController::Base
+
+>> controller.class.superclass.superclass.superclass
+=> ActionController::Metal
+
+>> controller.class.superclass.superclass.superclass.superclass
+=> AbstractController::Base
+
+>> controller.class.superclass.superclass.superclass.superclass.superclass
+=> Object
+```
+
+👇 *ここでコントローラのアクション（メソッド）を呼ぶこともできる*
+
+```ruby
+# home アクションを読んでみる
+  >> controller.home
+  => nil   # メソッドの中身は空なので nil が返る
+```
+
+⚠️ *Rails は Ruby で書かれているが、普通の Ruby オブジェクトと同様に振る舞うとは限らない*
+
+#### ユーザークラスの継承階層
+
+```ruby
+> user = User.new
+=>
+#<User:0x0000ffff8fb814a8
+...
+>> user.class
+=> User(id: integer, name: string, email: string, created_at: datetime, updated_at: datetime)
+
+>> user.class.superclass
+=> ApplicationRecord(abstract)
+
+>> user.class.superclass.superclass
+=> ActiveRecord::Base
+
+>> user.class.superclass.superclass.superclass
+=> Object
+```
+
+---
+
+## 組み込みクラスの変更
+
+👉 *Rubyに組み込まれている基本クラスは拡張可能*
+
+```ruby
+# 上で例示した palindrome? メソッドは、「文字列リテラル」に対して直接実行できない
+  >> "level".palindrome?
+  undefined method `level' for main:Object (NoMethodError)
+```
+
+👇 *継承を使わずに、`String` クラスを拡張する*
+
+```ruby
+# Word クラスを生成せず、palindrome?メソッドをStringクラスに直接追加する
+  >> class String
+
+# 文字列が回文であればtrueを返す
+  >>   def palindrome?
+  >>     self == self.reverse
+  >>   end
+  >> end
+  => :palindrome?
+
+# 文字列リテラルに対してメソッドを直接実行できる
+  >> "deified".palindrome?
+  => true
+```
+
+⚠️ *組み込みクラスの変更は強力なテクニックだが、真に正当な理由がない限り、組み込みクラスにメソッドを追加することは無作法とされる*
+
+
 ---
 
 ※ 以下編集中
