@@ -91,24 +91,103 @@
 
 ## クラスメソッド と インスタンスメソッド
 
-- **クラスメソッド** ： `String.new` のようにクラスが直接呼び出すメソッド
+### クラスメソッド
+
+- `String.new` のようにクラスが直接呼び出すメソッド
   👉 *「Rubyリファレンスマニュアル」では、`String.new` のように `.` で表記される*
 
-- **インスタンスメソッド** ： `"foobar".length` のようにインスタンスが呼び出すメソッド
+### インスタンスメソッド
+
+- `"foobar".length` のようにインスタンスが呼び出すメソッド
   👉 *「Rubyリファレンスマニュアル」では、`String#length` のように `#` と表記される*
 
 ---
 
 ## クラスの継承
 
-クラスの機能（メソッドなど）を受け継いで別のクラスを作ることができる
+👉 *クラスの機能（メソッドなど）を受け継いで別のクラスを作ることができる*
 
 - **継承元**となったクラス ： **親クラス**（`superclass`）
 - **継承先**となったクラス ： **子クラス**（`subclass`）
 
+### 継承の階層
+
+```ruby
+  >> s = String.new("foobar")
+  => "foobar"
+
+# 変数sのクラスを調べる
+  >> s.class
+  => String
+
+# Stringクラスの親クラスを調べる
+  >> s.class.superclass
+  => Object
+
+# Stringクラスの親クラスの親クラスを調べる
+  >> s.class.superclass.superclass
+  => BasicObject
+
+  >> s.class.superclass.superclass.superclass
+  => nil
+```
+
+👇 *このときのクラスの継承階層*
+
+  ```text
+    BasicObject
+    ↑
+    Object
+    ↑
+    String
+  ```
+
+- Ruby では、全てのオブジェクトは `BasicObject` クラスを継承している
+*= "Rubyではあらゆるものがオブジェクトである")*
+
+### `self` キーワード
+
+👉 *Rubyでは、`self` キーワードを使うと自分自身を指定できる*
+
+```ruby
+# Stringクラスを継承するWordクラスを定義
+  >> class Word < String
+# 文字列が回文であればtrueを返す
+  >>   def palindrome?
+  >>     self == self.reverse        # selfは文字列自身を表す
+  >>   end
+  >> end
+  => :palindrome?
+```
+
+- 上の場合、`self` は `Word` クラスの中で**オブジェクト自身**を指す
+
+  ```ruby
+  # palindrome? メソッドの定義
+    self == self.reverse
+  ```
+
+- `String` クラスの内部では、メソッドや属性を呼び出すときの `self.` を省略可能
+
+  ```ruby
+  # palindrome? メソッドをこう書ける
+    self == reverse
+  ```
+
+  👇
+
+  ```ruby
+  >> s = Word.new("level")
+  => "level"
+  >> s.palindrome?
+  => true
+  ```
+
 ---
 
-- Ruby のオブジェクトは `BasicObject` を祖先に持つ
+※ 以下編集中
+
+---
 
 ## 1️⃣ 何も書かないクラス
 
@@ -117,15 +196,6 @@ class A
 end
 ```
 
-このときの「継承ツリー」：
-
-  ```text
-  BasicObject
-    ↑
-    Object
-    ↑
-    A
-  ```
 
   👉 *デフォルトで `Object` を継承する*
 
