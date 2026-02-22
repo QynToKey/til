@@ -145,7 +145,50 @@
 - Ruby では、全てのオブジェクトは `BasicObject` クラスを継承している
 *= "Rubyではあらゆるものがオブジェクトである")*
 
-### `self` キーワード
+### クラスを生成するクラス
+
+- `String` クラスの継承構造
+
+```ruby
+# 文字列オブジェクトは String クラスのインスタンス
+  >> "さすけちゃん".class
+  => String
+
+# String クラスは Object クラスを継承している
+  > "さすけちゃん".class.superclass
+  => Object
+```
+
+- 他方、`String` クラスは `Class` クラスのインスタンスでもある
+
+```ruby
+# String クラスは Class クラスのインスタンス
+  >> "さすけちゃん".class.class
+  => Class
+
+# Class クラスは Module クラスを継承している
+  >> "さすけちゃん".class.class.superclass
+  => Module
+
+# Module クラスは Object クラスを継承している
+  >> "さすけちゃん".class.class.superclass.superclass
+  => Object
+```
+
+  👇
+
+  ```ruby
+  # Class クラスの継承階層
+  BasicObject
+    ↑
+  Object
+    ↑
+  Module
+    ↑
+  Class
+  ```
+
+#### `self` キーワード
 
 👉 *Rubyでは、`self` キーワードを使うと自分自身を指定できる*
 
@@ -189,52 +232,6 @@
 
 ---
 
-## 1️⃣ 何も書かないクラス
-
-```ruby
-class A
-end
-```
-
-
-  👉 *デフォルトで `Object` を継承する*
-
----
-
-## 2️⃣ 上位構造
-
-IRBで確認：
-
-```ruby
-Object.superclass
-# => BasicObject
-
-Class.superclass
-# => Module
-```
-
-このときの「継承ツリー」：
-
-  ```text
-  BasicObject
-    ↑
-    Object
-    ↑
-    Module
-    ↑
-    Class
-  ```
-
----
-
-## 3️⃣ Class もオブジェクト
-
-`Class` もまた `BasicObject` を祖先に持つオブジェクトである
-
-```ruby
-User.class
-# => Class
-```
 
 - このとき `class` は `Class` のインスタンス
 - `new` は `Class` に定義されている
