@@ -77,9 +77,14 @@ end
 ## ユーザー登録フォーム を作成
 
 ```ruby
-<h1>ユーザー登録</h1>
+<h1>新規登録</h1>
 
 <%= form_with model: @user do |f| %>
+  <div>
+    <%= f.label :name %><small>（ニックネーム可）</small><br>
+    <%= f.text_field :name %>
+  </div>
+  
   <div>
     <%= f.label :email %><br>
     <%= f.email_field :email %>
