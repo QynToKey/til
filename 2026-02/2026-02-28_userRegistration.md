@@ -84,7 +84,7 @@ end
     <%= f.label :name %><small>（ニックネーム可）</small><br>
     <%= f.text_field :name %>
   </div>
-  
+
   <div>
     <%= f.label :email %><br>
     <%= f.email_field :email %>
@@ -179,6 +179,8 @@ git restore README.md
 ⚠️ *ただし、ブランチを切る前の `main` の状態とは限らない*
 
 ### 現実的な運用
+
+📝 *今回は事故の発覚がマージ後だったため、リモートのログを頼りに手動で復旧したが、本来なら Git 操作で行いたい。*
 
 1.作業ブランチで `rails new` 実行
 2.直後に「上書きされた必要ファイル」だけ戻す
