@@ -28,7 +28,7 @@
 
 👉 *3 については `LearningRecord` 機能実装後の作業とし、まずは `require_login` を標準実装する*
 
- 📝 *セキュリティはデフォルトで「拒否」とし、必要に応じて例外的に開放するのが安全*
+📝 *セキュリティはデフォルトで「拒否」とし、必要に応じて例外的に開放するのが安全*
 
 ##### アクセス制御ポリシー
 
@@ -37,7 +37,7 @@
 | `LearningRecord new` | ✅ 可（体験用） |
 | `LearningRecord create` | ❌ 不可（保存はログイン必須） |
 | `LearningTheme` 全般 | ❌ 不可（ログイン必須） |
-| 各リソースの `index` アクション  | ❌ 不可（ログイン必須） |
+| 各リソースの `index` アクション | ❌ 不可（ログイン必須） |
 | `home#index` | ✅ 可 |
 | `Todo` 全般 | ❌ 不可（ログイン必須） |
 | ストップウォッチ | ✅ 可 |
@@ -82,3 +82,36 @@ skip_before_action :require_login, only: [:index]
 ---
 
 以上で [Render 設定](https://github.com/QynToKey/til/blob/main/2026-01/2026-01-31_render.md) して PR へ
+
+⬇️ Render ビルド中にエラー発生❗️
+
+## 本番環境のDB接続エラー
+
+### エラー内容
+
+```bash
+could not translate host name "db"
+```
+
+### 原因
+
+Docker用 `host: db` 設定が本番に残っていた。
+
+```ruby
+# config/database.yml のデフォルト設定
+production:
+  <<: *default
+  database: how_long_will_it_last_production
+  username: how_long_will_it_last
+  password: <%= ENV["HOW_LONG_WILL_IT_LAST_DATABASE_PASSWORD"] %>
+```
+
+### 対応
+
+```ruby
+# config/database.yml を以下に修正
+production:
+  url: <%= ENV['DATABASE_URL'] %>
+```
+
+👉 *PaaSでは `DATABASE_URL` を使う*
