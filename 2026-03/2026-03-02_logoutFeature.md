@@ -18,7 +18,9 @@
 
 ### 未ログイン時のアクセス制限
 
-#### 実装内容の確認
+#### 1️⃣ 実装内容の確認
+
+最終仕様：
 
 1. 未ログインでも入力できる
 2. 保存ボタン押すと「ログインが必要です」と表示
@@ -32,14 +34,15 @@
 
 | 機能 | 未ログイン可否 |
 | --- | --- |
-| LearningRecord new | ✅ 可（体験用） |
-| LearningRecord create | ❌ 不可（保存はログイン必須） |
-| LearningTheme 全般 | ❌ 不可（ログイン必須） |
-| index アクション | ❌ 不可（ログイン必須） |
-| Todo 全般 | ❌ 不可（ログイン必須） |
+| `LearningRecord new` | ✅ 可（体験用） |
+| `LearningRecord create` | ❌ 不可（保存はログイン必須） |
+| `LearningTheme` 全般 | ❌ 不可（ログイン必須） |
+| 各リソースの `index` アクション  | ❌ 不可（ログイン必須） |
+| `home#index` | ✅ 可 |
+| `Todo` 全般 | ❌ 不可（ログイン必須） |
 | ストップウォッチ | ✅ 可 |
 
-### `require_login` を実装
+### 2️⃣ `require_login` を実装
 
 #### デフォルトは「ログイン必須」
 
@@ -49,6 +52,8 @@ class ApplicationController < ActionController::Base
   ・・・
 end
 ```
+
+👉 *アクセス制御はアプリ全体のポリシーのため `ApplicationController` に定義*
 
 #### コントローラーごとにアクセス制限を解除
 
@@ -65,3 +70,15 @@ skip_before_action :require_login, only: [:index]
 ```
 
 👉 *TOP ページはアクセス制限を解除*
+
+---
+
+## 今回の学び
+
+- `before_action` は「デフォルト拒否」の方針で設計する
+- `skip_before_action` は最小限に限定する
+- 特殊仕様は後回しにする判断も重要
+
+---
+
+以上で [Render 設定](https://github.com/QynToKey/til/blob/main/2026-01/2026-01-31_render.md) して PR へ
