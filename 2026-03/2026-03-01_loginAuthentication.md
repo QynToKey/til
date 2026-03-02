@@ -37,6 +37,8 @@ post 'login',  to: 'user_sessions#create'
 delete 'logout', to: 'user_sessions#destroy'
 ```
 
+👉 *g コマンドで自動生成される `get "user_sessions/new"` は不要なので削除*
+
 ⬇️ `login_path` がつくられる
 
 `localhost:3000/rails/info/routes` で確認 ⭕️
