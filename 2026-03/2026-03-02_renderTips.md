@@ -2,27 +2,26 @@
 
 ## 0️⃣ 前提
 
-* Rails アプリを Docker でデプロイ
-* Render Web Service を使用
-* 本番 DB は Render PostgreSQL
+- Rails アプリを Docker でデプロイ
+- Render Web Service を使用
+- 本番 DB は Render PostgreSQL ⬅️ 未設定❗️
 
 ---
 
 ## 1️⃣ Render で PostgreSQL を作成
 
 1. Render ダッシュボード
-2. 「New +」→ PostgreSQL
+2. 「New +」→ **PostgreSQL**
 3. 必要項目を入力（Name / Region など）
-4. Status が **Available** になるまで待つ
+4. Status が `Available` になるまで待つ
 
 ---
 
 ## 2️⃣ DATABASE_URL の設定
 
-### 2-1. Internal URL を使用
+### 2-1. `Internal URL` を使用
 
-* PostgreSQL の「Connect」から
-* **Internal Database URL** をコピー
+- PostgreSQL の「Connect」から `Internal Database URL` をコピー
 
 例：
 
@@ -30,18 +29,18 @@
 postgresql://user:password@dpg-xxxx/how_long_will_it_last_db
 ```
 
----
+⬇️
 
 ### 2-2. Web Service 側に設定
 
-1. Web Service → Settings
-2. Environment
-3. Add Environment Variable
+1. 「Web Service」>「Settings」>「Environment」> `Add Environment Variable`
 
 ```bash
 Key: DATABASE_URL
 Value: （Internal URL）
 ```
+
+⬇️
 
 保存後、再デプロイ
 
@@ -52,55 +51,72 @@ Value: （Internal URL）
 ### 3-1. ローカルで生成
 
 ```bash
-bin/rails secret
+docker compose web bin/rails secret
 ```
 
-出力された長い文字列をコピー
+⬇️
 
----
-
-### 3-2. Render に登録
-
-Environment Variables に追加：
+出力された長い文字列をコピーして、「Environment Variables」 に追加
 
 ```bash
 Key: SECRET_KEY_BASE
 Value: （生成した文字列）
 ```
 
+⬇️
+
 保存 → 再デプロイ
 
 ---
 
-## 4️⃣ assets:precompile 失敗対策（重要）
+## 4️⃣ Render の build 時にエラー発生 ⚠️
 
-Docker build 時に発生したエラー：
+### `assets:precompile` のエラー
 
 ```bash
+# build 時のログより
 ActiveRecord::AdapterNotSpecified:
 database configuration does not specify adapter
 ```
 
-原因：
-
-* build 時には DATABASE_URL が存在しない
-* そのため production 環境で DB 設定が解決できない
+👉 *原因： build 時に参照する `DATABASE_URL` が存在しなかったため、 production 環境で DB 設定が完了できなかった (接続エラーではない)*
 
 ---
 
-### 4-1. Dockerfile 修正
+### `assets:precompile` のエラーの対応
+
+Render のログに `Dockerfile` のコードが行番号付きで表示されていたので、そこを見る。
+
+#### 1. ローカルで `Dockerfile` を修正
 
 ```dockerfile
+# デフォルトの設定
+RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
+# 以下に更新
 RUN SECRET_KEY_BASE_DUMMY=1 \
     RAILS_ENV=production \
     DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy \
     ./bin/rails assets:precompile
 ```
 
-ポイント：
+📝 ポイント：
+    - `assets:precompile` は DB に接続しない
+    - adapter が解決できれば OK
+    - 本番では、 runtime 時に本物の ENV が使われる
 
-* build 時だけダミー DATABASE_URL を渡す
-* 実際の本番 DB は実行時の ENV で上書きされる
+<!-- build 時だけダミー `DATABASE_URL` を渡す（実際の本番 DB は実行時の `ENV` で上書きされる）* -->
+
+---
+
+### （代替案）
+
+```bash
+production:
+  url: <%= ENV.fetch("DATABASE_URL", "postgresql://dummy:dummy@localhost/dummy") %>
+```
+
+👉 *`database.yml` に default を持たせる (Dockerfile を汚さずに解決可能)*
 
 ---
 
@@ -108,26 +124,18 @@ RUN SECRET_KEY_BASE_DUMMY=1 \
 
 本番 URL で確認：
 
-* ユーザー登録
-* ログイン
-* ログアウト
+☑️ ユーザー登録
+☑️ ログイン
+☑️ ログアウト
 
 ---
 
-## 6️⃣ 学び
+## まとめ
 
-* Render は build 時と runtime で環境変数の扱いが異なる
-* assets:precompile は production 環境で実行される
-* DB 未設定だと ActiveRecord が起動できない
-* Docker build 時にも最低限の DB 設定が必要
+- これまでは静的ページをデプロイするだけだったので**DB 設定**が不要に見えたが、Rails は production 起動時および `assets:precompile` 実行時に DB 設定を解決するため、**DB を使わない処理でも設定は必要**
+    👉 *(DB 設定が解決できないと ActiveRecord が起動できない)*
 
----
-
-## 明日やること
-
-* 本当に Dockerfile 修正が最適解か検討
-* `config/database.yml` 側で解決できるか検証
-* `config.require_master_key` の扱い確認
-* ドキュメントとして公開レベルまで整える
+- Render は build 時と runtime で**環境変数**の扱いが異なる
+    👉 *(`assets:precompile` は production 環境で実行される)*
 
 ---
