@@ -26,12 +26,12 @@
 
 ---
 
-## 3️⃣ 安全にマージする手順
+## 2️⃣ 安全にマージする手順
 
 1. PR を開き **CI** が通っているか確認
-2. 問題なければ GitHub 上で 「Merge pull request」をクリック
+2. 問題なければ GitHub 上で「Merge pull request」をクリック
 3. マージ後はローカル `main` を最新にする
-  👉 *`git pull origin main` を実行
+  👉 *`git pull origin main` を実行*
 4. Render の再ビルドが走るので、正常に反映されるか確認
 
 ---
