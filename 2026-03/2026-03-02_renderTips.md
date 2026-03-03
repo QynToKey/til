@@ -125,17 +125,21 @@ production:
 本番 URL で確認：
 
 ☑️ ユーザー登録
+
 ☑️ ログイン
-☑️ ログアウト
+
+☑️ ログアウト  
 
 ---
 
 ## まとめ
 
 - これまでは静的ページをデプロイするだけだったので**DB 設定**が不要に見えたが、Rails は production 起動時および `assets:precompile` 実行時に DB 設定を解決するため、**DB を使わない処理でも設定は必要**
+
     👉 *(DB 設定が解決できないと ActiveRecord が起動できない)*
 
 - Render は build 時と runtime で**環境変数**の扱いが異なる
+
     👉 *(`assets:precompile` は production 環境で実行される)*
 
 ---
