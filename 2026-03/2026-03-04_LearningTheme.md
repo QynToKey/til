@@ -126,3 +126,24 @@ class User < ApplicationRecord
   validates ...
 end
 ```
+
+---
+
+### 4️⃣ `db:migrate` を実行
+
+```bash
+docker compose exec rails db:migrate
+```
+
+⬇️
+
+```bash
+== 20260304080053 CreateLearningThemes: migrating =============================
+-- create_table(:learning_themes)
+   -> 0.0436s
+-- add_index(:learning_themes, [:user_id, :name], {:unique=>true})
+   -> 0.0021s
+== 20260304080053 CreateLearningThemes: migrated (0.0458s) ====================
+```
+
+---
