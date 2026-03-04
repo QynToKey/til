@@ -48,3 +48,81 @@
   ```
 
 ---
+
+## 実装
+
+### 1️⃣ `LearningTheme` を生成
+
+```bash
+docker compose exec web rails g model LearningTheme name:string description:text user:references
+```
+
+👉 *カラムの記述は順不同で構わないが、実務では可読性の観点で以下のようにすることが多い*
+
+  1. 主要カラム（`name`）
+  2. 補足カラム（`description`）
+  3. 外部キー（`user`）
+
+### 2️⃣ migrate ファイルを修正
+
+```ruby
+
+class CreateLearningThemes < ActiveRecord::Migration[7.0]
+  def change
+    create_table :learning_themes do |t|
+      t.string :name, null: false
+      t.text :description
+      t.references :user, null: false,
+                          foreign_key: { on_delete: :cascade }
+
+      t.timestamps
+    end
+
+    add_index :learning_themes, [:user_id, :name], unique: true
+  end
+end
+```
+
+👉 *以下を実装*
+
+- user_id → NOT NULL
+- 外部キー制約
+- ON DELETE CASCADE
+- (user_id, name) UNIQUE
+- description → text
+
+### 3️⃣ モデル側にバリデーション および アソシエーション を追記
+
+- `app/models/learning_theme.rb`
+
+```ruby
+class LearningTheme < ApplicationRecord
+  belongs_to :user
+
+  validates :name, presence: true, uniqueness: { scope: :user_id }
+end
+```
+
+- `user.rb'
+
+```ruby
+  has_many :learning_themes, dependent: :destroy
+```
+
+📝 モデルファイルの構造は、可読性の観点から以下が一般的
+
+```ruby
+class User < ApplicationRecord
+  # 認証
+  authenticates_with_sorcery!
+
+  # Association
+  has_many :learning_themes, dependent: :destroy
+
+  # Callback
+  before_validation ...
+
+  # Validation
+  validates ...
+end
+```
