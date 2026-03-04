@@ -147,3 +147,62 @@ docker compose exec rails db:migrate
 ```
 
 ---
+
+### 5️⃣ コンソールで動作確認
+
+#### ☑️ `LearningTheme` を作成 / 保存できる
+
+```bash
+>> user = User.first
+:
+>> user.learning_themes.create!(name: "Ruby")
+:
+=>
+#<LearningTheme:0x0000ffff8e76ffa0
+ id: 1,
+ name: "Ruby",
+ description: nil,
+ user_id: 1,
+ created_at: "2026-03-04 08:47:22.264448000 +0000",
+ updated_at: "2026-03-04 08:47:22.264448000 +0000">
+ ```
+
+#### ☑️ 同一ユーザーが同名 `LearningTheme` を作成しようとするとバリデーションエラーとなる
+
+```bash
+>> user.learning_themes.create!(name: "Ruby")
+:
+  TRANSACTION (0.5ms)  ROLLBACK
+(how-long-will-it-last):3:in `<main>': Validation failed: Name has already been taken (ActiveRecord::RecordInvalid)
+```
+
+#### ☑️ 別ユーザーは同名 `LearningTheme` を作成 / 保存できる
+
+```bash
+> user2 = User.last
+:
+=>
+#<User:0x0000ffff8e8fe100
+...
+>> user2.learning_themes.create!(name: "Ruby")
+:
+=>
+#<LearningTheme:0x0000ffff8e8fb900
+ id: 2,
+ name: "Ruby",
+ description: nil,
+ user_id: 3,
+ created_at: "2026-03-04 08:56:16.114915000 +0000",
+ updated_at: "2026-03-04 08:56:16.114915000 +0000">
+ ```
+
+#### ☑️ ユーザーを削除すると `LearningTheme` も削除される
+
+```bash
+>> user.destroy
+:
+  LearningTheme Destroy (6.4ms)  DELETE FROM "learning_themes" WHERE "learning_themes"."id" = $1  [["id", 1]]
+  User Destroy (0.6ms)  DELETE FROM "users" WHERE "users"."id" = $1  [["id", 1]]
+ ```
+
+---
