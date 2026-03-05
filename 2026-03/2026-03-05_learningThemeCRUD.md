@@ -275,3 +275,18 @@ end
 - 構想としては、TOP ページから「今日の記録」ヘダイレクトに飛ぶくらいのシンプルな構成を現段階ではイメージしている。
 
 ---
+
+## push → PR
+
+- CI で Lint と Test のエラーが発生したので対応した。
+  - `docker compose exec web bin/rubocop -A`
+  - `rm test/controllers/learning_themes_controller_test.rb`
+
+👉 *Test エラーは、g コマンドで自動生成されるテストコードが必ずしも設計方針と合致しないために起こる。本プロジェクトでは、以降 g コマンドで `--skip-test` を指定することとする。*
+
+```bash
+# 次の Issue で想定するコマンド
+rails g controller LearningRecords --skip-test
+```
+
+---
