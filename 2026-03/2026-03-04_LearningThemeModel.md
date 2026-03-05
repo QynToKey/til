@@ -31,7 +31,7 @@
 
 #### 🔸 `foreign_key: true`
 
-  `user_id` に「実在するユーザーID」だけを許可する制約
+  users テーブルに存在する `user_id` だけを許可する制約
 
 #### 🔸 `dependent: :destroy` と `ON DELETE CASCADE`
 
