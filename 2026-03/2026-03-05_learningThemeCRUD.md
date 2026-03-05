@@ -49,6 +49,28 @@ current_user.learning_themes.build
 LearningTheme.new(user_id: current_user.id)
 ```
 
+👉 *`user_id` > `learning_theme` というドメイン関係をコードで表現することで、データが常に正しい所有関係のもとに生成される*
+
 ---
 
-### 4️⃣
+### 4️⃣ `before_action` / `strong parameters` を追加
+
+```ruby
+class LearningThemesController < ApplicationController
+  before_action :require_login # current_user = nil を許可しない
+  ・・・
+  private
+
+  def learning_theme_params
+    params.require(:learning_theme).permit(:name, :description)
+  end
+end
+```
+
+👉 *未ログインなら `login_path` にリダイレクト*
+
+⚠️ *`user_id` は絶対に permit しない*
+
+---
+
+### 5️⃣
