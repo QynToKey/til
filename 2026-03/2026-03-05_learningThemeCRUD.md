@@ -51,7 +51,7 @@ LearningTheme.new(user_id: current_user.id)
 
 👉 *`user_id` > `learning_theme` というドメイン関係をコードで表現することで、データが常に正しい所有関係のもとに生成される*
 
----
+  ---
 
 ### 4️⃣ `before_action` / `strong parameters` を追加
 
@@ -71,6 +71,24 @@ end
 
 ⚠️ *`user_id` は絶対に permit しない*
 
----
+  ---
 
-### 5️⃣
+### 5️⃣ `index` アクション
+
+```ruby
+  def index
+    @learning_themes = current_user.learning_themes.order(created_at: :desc)
+  end
+```
+
+👉 *`current_user.learning_themes` とすることで、他のユーザーのデータを取得しない*
+
+  ➡️ SQL に `WHERE` が付く
+
+  ```bash
+  WHERE user_id = current_user.id
+  ```
+
+  ---
+
+### 6️⃣
