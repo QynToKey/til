@@ -105,8 +105,30 @@ class LearningThemesController < ApplicationController
 end
 ```
 
-👉 *これにより `edit` / `update` / `destroy` で毎回同じコードを書かなくて済むようになる*
+👉 *これにより `edit` / `update` / `destroy` で毎回同じコードを書かなくて済むようになる （ここで `index` を外していることに留意❗️）*
+
+  📝 アクションごとに責務をわける
+
+  | アクション | 呼び出すデータ |
+  | --- | --- |
+  | `edit` / `update` / `destroy` | @learning_theme |
+  | `index` | @learning_themes |
 
   ---
 
-### 7️⃣
+### 7️⃣ update` / `destroy` アクションを追加
+
+```ruby
+  def update
+    if @learning_theme.update(learning_theme_params)
+      redirect_to learning_themes_path, notice: "テーマを更新しました"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @learning_theme.destroy
+    redirect_to learning_themes_path, notice: "テーマを削除しました"
+  end
+```
