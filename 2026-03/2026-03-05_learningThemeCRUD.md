@@ -25,7 +25,7 @@
 
 - 📝 `show` は MVP 段階では不要と判断。
 
-  ---
+---
 
 ### 1️⃣ ルーティング に `resources` を追加
 
@@ -33,7 +33,7 @@
 resources :learning_themes
 ```
 
-  ---
+---
 
 ### 2️⃣ Controller を生成
 
@@ -41,7 +41,7 @@ resources :learning_themes
 docker compose exec web rails g controller LearningThemes new create index edit update destroy
 ```
 
-  ---
+---
 
 ### 3️⃣ `create` アクションを定義
 
@@ -72,9 +72,9 @@ current_user.learning_themes.build
 LearningTheme.new(user_id: current_user.id)
 ```
 
-👉 *`user_id` > `learning_theme` というドメイン関係をコードで表現することで、データが常に正しい所有関係のもとに生成される*
+👉 *`user_id` > `learning_theme` という隷属関係 (ownership) をコードで表現することで、データが常に正しい所有関係のもとに生成される*
 
-  ---
+---
 
 ### 4️⃣ `before_action` / `strong parameters` を追加
 
@@ -101,7 +101,7 @@ end
 | `learning_theme_params` | strong parameters |
 | `current_user.learning_themes` | ユーザーとデータのドメイン関係を保証 |
 
-  ---
+---
 
 ### 5️⃣ `index` アクション
 
@@ -119,7 +119,7 @@ end
   WHERE user_id = current_user.id
   ```
 
-  ---
+---
 
 ### 6️⃣ `set_learning_theme` メソッドを追加
 
@@ -144,7 +144,7 @@ end
   | `edit` / `update` / `destroy` | @learning_theme |
   | `index` | @learning_themes |
 
-  ---
+---
 
 ### 7️⃣ `update` / `destroy` アクションを追加
 
@@ -163,9 +163,9 @@ end
   end
 ```
 
-  ---
+---
 
-8️⃣ `new` アクションを追加
+### 8️⃣ `new` アクションを追加
 
 ```ruby
 def new
@@ -173,9 +173,9 @@ def new
 end
 ```
 
-  ---
+---
 
-### ９ view を作成し、LearningThemes への動線を追加
+### 9️⃣ view を作成し、LearningThemes への動線を追加
 
 - `index.html.erb`
 
@@ -224,6 +224,8 @@ end
 ```bash
 touch app/views/learning_themes/_form.html.erb
 ```
+
+⬇️
 
 ```ruby
 <%= form_with model: learning_theme do |f| %>
@@ -282,7 +284,11 @@ end
   - `docker compose exec web bin/rubocop -A`
   - `rm test/controllers/learning_themes_controller_test.rb`
 
-👉 *Test エラーは、g コマンドで自動生成されるテストコードが必ずしも設計方針と合致しないために起こる。本プロジェクトでは、以降 g コマンドで `--skip-test` を指定することとする。*
+👉 *Test エラーは、g コマンドで自動生成されるテストコードが必ずしも設計方針と合致しないために起こる。（今回は、`users.email`が `NOT NULL` のため、fixture の User 作成に失敗するため発生した）*
+
+⬇️
+
+本プロジェクトでは、以降 g コマンドで `--skip-test` を指定することとする。
 
 ```bash
 # 次の Issue で想定するコマンド
