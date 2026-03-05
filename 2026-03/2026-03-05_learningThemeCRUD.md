@@ -91,4 +91,22 @@ end
 
   ---
 
-### 6️⃣
+### 6️⃣ `set_learning_theme` メソッドを追加
+
+```ruby
+class LearningThemesController < ApplicationController
+  before_action :set_learning_theme, only: %i[edit update destroy]
+
+  private
+
+  def set_learning_theme
+    @learning_theme = current_user.learning_themes.find(params[:id])
+  end
+end
+```
+
+👉 *これにより `edit` / `update` / `destroy` で毎回同じコードを書かなくて済むようになる*
+
+  ---
+
+### 7️⃣
