@@ -33,6 +33,8 @@
 
   users テーブルに存在する `user_id` だけを許可する制約
 
+  ⚠️ *ただし、「正しいユーザー」かどうかは保証しない (= 他人のIDを指定する攻撃は防げない)*
+
 #### 🔸 `dependent: :destroy` と `ON DELETE CASCADE`
 
 - `dependent: :destroy` ： Rails経由でUserを削除したとき、関連テーマも削除
