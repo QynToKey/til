@@ -19,9 +19,11 @@
   - バリデーション
   - リダイレクト先
 
-が確定するため、Controller のロジックが安定する。
+  が確定するため、Controller のロジックが安定する。
 
 - 📝 view は controller のインスタンス変数に依存するため、controller を先に完成させる方がスムーズ。
+
+- 📝 `show` は MVP 段階では不要と判断。
 
   ---
 
@@ -170,3 +172,88 @@ def new
   @learning_theme = current_user.learning_themes.build
 end
 ```
+
+  ---
+
+### ９ view を作成
+
+- `index.html.erb`
+
+```ruby
+<h1>学習テーマ</h1>
+
+<%= link_to "新しいテーマ", new_learning_theme_path %>
+
+<ul>
+  <% @learning_themes.each do |theme| %>
+    <li>
+      <strong><%= theme.name %></strong>
+      <p><%= theme.description %></p>
+
+      <%= link_to "編集", edit_learning_theme_path(theme) %>
+      <%= link_to "削除", learning_theme_path(theme),
+            data: { turbo_method: :delete, turbo_confirm: "削除しますか？" } %>
+    </li>
+  <% end %>
+</ul>
+```
+
+- `new.html.erb`
+
+```ruby
+<h1>学習テーマを作成</h1>
+
+<%= render "form", learning_theme: @learning_theme %>
+
+<%= link_to "戻る", learning_themes_path %>
+```
+
+- `edit.html.erb`
+
+```ruby
+
+<h1>学習テーマを編集</h1>
+
+<%= render "form", learning_theme: @learning_theme %>
+
+<%= link_to "戻る", learning_themes_path %>
+```
+
+- `_form.html.erb`
+
+```bash
+touch app/views/learning_themes/_form.html.erb
+```
+
+```ruby
+<%= form_with model: learning_theme do |f| %>
+
+  <% if learning_theme.errors.any? %>
+    <div>
+      <h2><%= learning_theme.errors.count %>件のエラーがあります</h2>
+      <ul>
+        <% learning_theme.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "テーマ名" %><br>
+    <%= f.text_field :name %>
+  </div>
+
+  <div>
+    <%= f.label :description, "説明" %><br>
+    <%= f.text_area :description %>
+  </div>
+
+  <div>
+    <%= f.submit %>
+  </div>
+
+<% end %>
+```
+
+---
