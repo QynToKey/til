@@ -4,6 +4,27 @@
 
 ## 実装
 
+### 0️⃣ 実装手順
+
+1. `index`
+2. `create`
+3. `update`
+4. `destroy`
+5. `new` / `edit`
+6. view
+
+- 📝 `create` アクションから定義することで、
+
+  - 必要なパラメータ
+  - バリデーション
+  - リダイレクト先
+
+が確定するため、Controller のロジックが安定する。
+
+- 📝 view は controller のインスタンス変数に依存するため、controller を先に完成させる方がスムーズ。
+
+  ---
+
 ### 1️⃣ ルーティング に `resources` を追加
 
 ```ruby
@@ -20,7 +41,7 @@ docker compose exec web rails g controller LearningThemes new create index edit 
 
   ---
 
-### 3️⃣ `create` メソッドを定義
+### 3️⃣ `create` アクションを定義
 
 ```ruby
 class LearningThemesController < ApplicationController
@@ -71,6 +92,13 @@ end
 
 ⚠️ *`user_id` は絶対に permit しない*
 
+| コード | 役割 |
+| --- | --- |
+| `require_login` | 未ログインアクセス防止 |
+| `set_learning_theme` | 対象となるレコードを取得 |
+| `learning_theme_params` | strong parameters |
+| `current_user.learning_themes` | ユーザーとデータのドメイン関係を保証 |
+
   ---
 
 ### 5️⃣ `index` アクション
@@ -116,7 +144,7 @@ end
 
   ---
 
-### 7️⃣ update` / `destroy` アクションを追加
+### 7️⃣ `update` / `destroy` アクションを追加
 
 ```ruby
   def update
@@ -131,4 +159,14 @@ end
     @learning_theme.destroy
     redirect_to learning_themes_path, notice: "テーマを削除しました"
   end
+```
+
+  ---
+
+8️⃣ `new` アクションを追加
+
+```ruby
+def new
+  @learning_theme = current_user.learning_themes.build
+end
 ```
