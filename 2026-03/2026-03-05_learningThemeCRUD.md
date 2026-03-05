@@ -175,7 +175,7 @@ end
 
   ---
 
-### ９ view を作成
+### ９ view を作成し、LearningThemes への動線を追加
 
 - `index.html.erb`
 
@@ -255,5 +255,23 @@ touch app/views/learning_themes/_form.html.erb
 
 <% end %>
 ```
+
+- LearningThemes への動線を追加
+
+```ruby
+# app/controllers/user_sessions_controller.rb
+def create
+  @user = login(params[:email], params[:password])
+
+  if @user
+    redirect_to learning_themes_path, notice: "ログインしました"
+・・・
+end
+```
+
+📝 設計メモ：
+
+- 本来なら「ダッシュボード」を用意すべきだろうが、MVP 後に検討するものとする。
+- 構想としては、TOP ページから「今日の記録」ヘダイレクトに飛ぶくらいのシンプルな構成を現段階ではイメージしている。
 
 ---
