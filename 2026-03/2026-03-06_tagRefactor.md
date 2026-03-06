@@ -137,25 +137,33 @@ erDiagram
 
 ## Learning_Theme の削除
 
-### 1️⃣ Railsコンソールをひらく
+### 1️⃣ Learning_Themes テーブルのデータを削除
+
+- Railsコンソールをひらく
 
 ```bash
 docker compose exec web rails c
 ```
 
-### 2️⃣ 現在のデータを確認
+⬇️
+
+- 現在のデータを確認
 
 ```bash
 >> LearningTheme.all
 ```
 
-### 3️⃣ 問題なければデータを削除
+⬇️
+
+- 問題なければデータを削除
 
 ```bash
 >> LearningTheme.destroy_all
 ```
 
-### 4️⃣ 削除を確認
+⬇️
+
+- 削除を確認
 
 ```bash
 > LearningTheme.count
@@ -163,4 +171,76 @@ docker compose exec web rails c
 => 0
 ```
 
-### 5️⃣ テーブル削除（マイグレーション）
+### 2️⃣ Learning_Themes テーブルを削除
+
+- マイグレーション
+
+```bash
+$ docker compose exec web rails g migration DropLearningThemes
+      invoke  active_record
+      create    db/migrate/20260306091440_drop_learning_themes.rb
+```
+
+⬇️
+
+- 生成された migration を編集
+
+```ruby
+class DropLearningThemes < ActiveRecord::Migration[7.2]
+  def change
+    drop_table :learning_themes
+  end
+end
+```
+
+⬇️
+
+- migration 実行
+
+```bash
+$ docker compose exec web rails db:migrate
+== 20260306091440 DropLearningThemes: migrating ===============================
+-- drop_table(:learning_themes)
+   -> 0.0139s
+== 20260306091440 DropLearningThemes: migrated (0.0139s) ======================
+```
+
+⬇️
+
+- テーブル削除を確認
+
+```bash
+how-long-will-it-last(dev)> ActiveRecord::Base.connection.tables
+=> ["schema_migrations", "ar_internal_metadata", "users"]
+```
+
+👉 *`learning_themes` が存在しなければ削除成功*
+
+⬇️
+
+- モデルを削除
+
+```bash
+rm app/models/learning_theme.rb
+rm app/controllers/learning_themes_controller.rb
+rm -r app/views/learning_themes
+rm app/helpers/learning_themes_helper.rb
+rm test/models/learning_theme_test.rb
+```
+
+⬇️
+
+- 最終チェック
+
+```bash
+grep -R "LearningTheme" .
+```
+
+👉 *以下だけが残っている状態なら削除成功*
+
+```</>
+db/migrate/...
+log/...
+.git/...
+tmp/...
+```
