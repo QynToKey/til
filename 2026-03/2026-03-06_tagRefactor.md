@@ -2,7 +2,7 @@
 
 ---
 
-## 0️⃣ 前提
+## 前提
 
 - 現行設計では LearningTheme が主役になっており、本来の主役として想定している **LearningRecord はこれに従属する**関係になっている。
 
@@ -135,4 +135,32 @@ erDiagram
 
 ---
 
-## 2️⃣ Learning_Theme の削除
+## Learning_Theme の削除
+
+### 1️⃣ Railsコンソールをひらく
+
+```bash
+docker compose exec web rails c
+```
+
+### 2️⃣ 現在のデータを確認
+
+```bash
+>> LearningTheme.all
+```
+
+### 3️⃣ 問題なければデータを削除
+
+```bash
+>> LearningTheme.destroy_all
+```
+
+### 4️⃣ 削除を確認
+
+```bash
+> LearningTheme.count
+  LearningTheme Count (8.8ms)  SELECT COUNT(*) FROM "learning_themes"
+=> 0
+```
+
+### 5️⃣ テーブル削除（マイグレーション）
