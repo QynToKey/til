@@ -26,4 +26,91 @@ users
 
 ---
 
-1️⃣
+1️⃣ テーブル設計に「中間テーブル」を追加
+
+- `README.md`
+
+```markdown
+#### Eテーブル：record_tags
+
+※ learning_records と tags の多対多関係を管理する中間テーブル
+
+- `record_id` : bigint / learning_recordsテーブルの外部キー
+- `tag_id` : bigint / tagsテーブルの外部キー
+
+#### Fテーブル：todo_tags
+
+※ todos と tags の多対多関係を管理する中間テーブル
+
+- `todo_id` : bigint / todosテーブルの外部キー
+- `tag_id` : bigint / tagsテーブルの外部キー
+'''
+
+- `docs/er_diagram.md`
+
+```mermaid
+erDiagram
+
+    USERS {
+        bigint id PK
+        string name
+        string email "NOT NULL, UNIQUE"
+        string crypted_password "NOT NULL"
+        string salt "NOT NULL"
+        datetime created_at
+        datetime updated_at
+    }
+
+    LEARNING_RECORDS {
+        bigint id PK
+        bigint user_id FK
+        date study_date "NOT NULL"
+        integer duration_minutes
+        text content "NOT NULL"
+        datetime started_at
+        datetime ended_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    TAGS {
+        bigint id PK
+        bigint user_id FK
+        string name "UNIQUE (user_id, name)"
+        datetime created_at
+        datetime updated_at
+    }
+
+    TODOS {
+        bigint id PK
+        bigint user_id FK
+        bigint tag_id FK
+        string title
+        text description
+        boolean is_completed "NOT NULL, default: false"
+        datetime created_at
+        datetime updated_at
+    }
+
+    RECORD_TAGS {
+        bigint id PK
+        bigint record_id FK
+        bigint tag_id FK "UNIQUE (record_id, tag_id)"
+    }
+
+    TODO_TAGS {
+      bigint id PK
+      bigint todo_id FK
+      bigint tag_id FK "UNIQUE (todo_id, tag_id)"
+    }
+
+    USERS ||--o{ LEARNING_RECORDS : has
+    USERS ||--o{ TAGS : has
+    USERS ||--o{ TODOS : has
+
+    LEARNING_RECORDS ||--o{ RECORD_TAGS : has
+    TAGS ||--o{ RECORD_TAGS : has
+
+    TODOS ||--o{ TODO_TAGS : has
+    TAGS ||--o{ TODO_TAGS : has
+```
