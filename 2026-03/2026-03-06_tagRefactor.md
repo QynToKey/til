@@ -58,8 +58,11 @@ users
   中間テーブル `record_tags` に分離した。
 
 - 第2正規形
-  すべてのテーブルは単一主キー (`id`) を持つため、
-  非キー属性は主キーに完全関数従属する。
+  主キーまたは複合キーに対して、
+  非キー属性が完全関数従属するよう設計している。
+
+  中間テーブル（record_tags / todo_tags）は
+  非キー属性を持たないため問題は発生しない。
 
 - 第3正規形
   非キー属性が他の非キー属性に依存する推移的依存を排除している。
@@ -102,7 +105,6 @@ erDiagram
     TODOS {
         bigint id PK
         bigint user_id FK
-        bigint tag_id FK
         string title
         text description
         boolean is_completed "NOT NULL, default: false"
@@ -242,3 +244,5 @@ log/...
 .git/...
 tmp/...
 ```
+
+---
