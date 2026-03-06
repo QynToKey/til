@@ -111,13 +111,11 @@ erDiagram
     }
 
     RECORD_TAGS {
-        bigint id PK
         bigint record_id FK
         bigint tag_id FK "UNIQUE (record_id, tag_id)"
     }
 
     TODO_TAGS {
-      bigint id PK
       bigint todo_id FK
       bigint tag_id FK "UNIQUE (todo_id, tag_id)"
     }
