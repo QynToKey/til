@@ -44,9 +44,27 @@ users
 
 - `todo_id` : bigint / todosテーブルの外部キー
 - `tag_id` : bigint / tagsテーブルの外部キー
-'''
+```
 
 - `docs/er_diagram.md`
+
+```markdown
+### 正規化について
+
+本設計は第3正規形（3NF）を満たすことを意識している。
+
+- 第1正規形
+  繰り返し属性を排除するため、`learning_records` と `tags` の多対多関係を
+  中間テーブル `record_tags` に分離した。
+
+- 第2正規形
+  すべてのテーブルは単一主キー (`id`) を持つため、
+  非キー属性は主キーに完全関数従属する。
+
+- 第3正規形
+  非キー属性が他の非キー属性に依存する推移的依存を排除している。
+  例えば、`tags` や `users` の情報を `learning_records` に重複保持していない。
+```
 
 ```mermaid
 erDiagram
@@ -114,3 +132,7 @@ erDiagram
     TODOS ||--o{ TODO_TAGS : has
     TAGS ||--o{ TODO_TAGS : has
 ```
+
+---
+
+## 2️⃣ Learning_Theme の削除
