@@ -1,4 +1,4 @@
-# [卒制](https://github.com/QynToKey/HowLongWillItLast) (day 11)：LearningRecord 機能
+# [卒制](https://github.com/QynToKey/HowLongWillItLast) (day 11)：LearningRecord 機能 (`new` / `create`)
 
 ---
 
@@ -200,7 +200,7 @@ class LearningRecordsController < ApplicationController
 
     if @learning_record.save
       # 記録後は詳細ページ( show )へリダイレクト
-      redirect_to @learning_records, notice: "学習記録を保存しました"
+      redirect_to @learning_record, notice: "学習記録を保存しました"
     else
       flash.now[:alert] = "学習記録の保存に失敗しました"
       render :new, status: :unprocessable_entity
