@@ -184,6 +184,36 @@ $ docker compose exec web rails g controller LearningRecords
 ### コントローラーを編集
 
 ```ruby
+class LearningRecordsController < ApplicationController
+  skip_before_action :require_login, only: %i[new index]
+
+  def new
+    # デフォルトで今日の日付をセットする
+    @learning_record = LearningRecord.new(study_date: Date.today)
+  end
+
+  def create
+    # ⬇️ 本来必要なコードだが、ビューで制御するため不要
+    # unless logged_in?
+    # redirect_to login_path, alert: "ログインしてください"
+    # return
+
+    @learning_record = current_user.learning_records.build(learning_record_params)
+
+    if @learning_record.save
+      redirect_to learning_records_path, notice: "学習記録を保存しました"
+    else
+      flash.now[:alert] = "学習記録の保存に失敗しました"
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def learning_record_params
+    params.require(:learning_record).permit(:study_date, :content, :duration_minutes, :started_at, :ended_at, tag_ids: [])
+  end
+end
 ```
 
 📝 ストロングパラメーターに含めるべきカラム
@@ -198,3 +228,11 @@ $ docker compose exec web rails g controller LearningRecords
 | `user_id` | ❌ `current_user` から取得 |
 
 *(ストロングパラメーターは **ユーザーがフォームから入力するカラム** を許可する)*
+
+---
+
+## 5️⃣ 「今日の記録画面」を作成
+
+```bash
+touch app/views/learning_records/new.html.erb
+```
