@@ -93,3 +93,22 @@ end
 ---
 
 ## 1️⃣ バリデーションの設定
+
+```ruby
+class LearningRecord < ApplicationRecord
+  ・・・
+  validates :study_date, presence: true
+  validates :content, presence: true
+  validates :duration_minutes, allow_nil: true, numericality: { only_integer: true, greater_than: 0 }
+  validates :started_at, allow_nil: true
+  validates :ended_at, allow_nil: true
+end
+```
+
+👉 *ストップウォッチによる自動計測機能は、「手入力」を許可したいので `allow_nil: true` とする*
+
+👉 *`duration_minuets` は「正の整数」のみ許可*
+
+---
+
+## 2️⃣
