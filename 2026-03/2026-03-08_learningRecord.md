@@ -148,8 +148,20 @@ class LearningRecord < ApplicationRecord
 end
 ```
 
-👉 *Railsの「コールバック実行順序」は、コードの書き順に関係なく**Railsが決めた順番**で動く*
+👉 *Railsの「コールバック実行順序」は、コードの書き順に関係なく**Railsが決めた順番**で動く* ⇨ [Active Record コールバック](https://railsguides.jp/v7.1/active_record_callbacks.html)
 
 ---
 
-## 3️⃣
+## 3️⃣ LearningRecord をルーティングに追加
+
+```ruby
+Rails.application.routes.draw do
+  ・・・
+  resources :learning_records
+  ・・・
+end
+```
+
+---
+
+## 4️⃣
