@@ -236,3 +236,45 @@ end
 ```bash
 touch app/views/learning_records/new.html.erb
 ```
+
+⬇️
+
+```ruby
+# app/views/learning_records/new.html.erb
+<h1>今日の学習記録</h1>
+
+<% if @learning_record.errors.any? %>
+  <div style="color: red;">
+    <h2><%= @learning_record.errors.count %>件のエラーがあります</h2>
+    <ul>
+      <% @learning_record.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with model: @learning_record do |f| %>
+  <div>
+    <%= f.label :content %><br>
+    <%= f.text_area :content, rows: 4 %><br>
+    <small>学習内容</small>
+  </div>
+
+  <div>
+    <%= f.label :duration_minutes %><br>
+    <%= f.number_field :duration_minutes, min: 0 %><br>
+    <small>学習時間（分）</small>
+  </div>
+
+  <div>
+    <%= f.label :study_date %><br>
+    <%= f.date_field :study_date %><br>
+    <small>日付</small>
+  </div>
+
+  <div>
+    <%= f.submit "記録する" %>
+  </div>
+<% end %>
+```
