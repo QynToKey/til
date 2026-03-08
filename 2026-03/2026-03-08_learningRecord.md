@@ -164,4 +164,37 @@ end
 
 ---
 
-## 4️⃣
+## 4️⃣ `learning_records_controller` を作成
+
+### `rails g controller LearningRecords`
+
+```bash
+$ docker compose exec web rails g controller LearningRecords
+      create  app/controllers/learning_records_controller.rb
+      invoke  erb
+      create    app/views/learning_records
+      invoke  helper
+      create    app/helpers/learning_records_helper.rb
+```
+
+⚠️ *ここでアクション名を指定すると、すでに `routes.rb` に `resources :learning_records` を実装済みなので、ルーティングが重複してしまう*
+
+⬇️
+
+### コントローラーを編集
+
+```ruby
+```
+
+📝 ストロングパラメーターに含めるべきカラム
+
+| カラム | フォームから入力する？ |
+| --- | --- |
+| `study_date` | ✅ |
+| `content` | ✅ |
+| `duration_minutes` | ✅ 手入力の場合 |
+| `started_at` | ✅ ストップウォッチの場合 |
+| `ended_at` | ✅ ストップウォッチの場合 |
+| `user_id` | ❌ `current_user` から取得 |
+
+*(ストロングパラメーターは **ユーザーがフォームから入力するカラム** を許可する)*
