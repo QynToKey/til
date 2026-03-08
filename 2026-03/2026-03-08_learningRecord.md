@@ -100,8 +100,6 @@ class LearningRecord < ApplicationRecord
   validates :study_date, presence: true
   validates :content, presence: true
   validates :duration_minutes, allow_nil: true, numericality: { only_integer: true, greater_than: 0 }
-  validates :started_at, allow_nil: true
-  validates :ended_at, allow_nil: true
 end
 ```
 
@@ -201,7 +199,8 @@ class LearningRecordsController < ApplicationController
     @learning_record = current_user.learning_records.build(learning_record_params)
 
     if @learning_record.save
-      redirect_to learning_records_path, notice: "学習記録を保存しました"
+      # 記録後は詳細ページ( show )へリダイレクト
+      redirect_to @learning_records, notice: "学習記録を保存しました"
     else
       flash.now[:alert] = "学習記録の保存に失敗しました"
       render :new, status: :unprocessable_entity
@@ -275,3 +274,30 @@ touch app/views/learning_records/new.html.erb
   </div>
 <% end %>
 ```
+
+---
+
+## 6️⃣ 動作確認
+
+### 動作確認のために `show` アクションとビューを追加
+
+```ruby
+# app/controllers/learning_records_controller.rb
+  def show
+    @learning_record = current_user.learning_records.find(params[:id])
+  end
+```
+
+```bash
+touch app/views/learning_records/show.html.erb
+```
+
+⬇️
+
+### [ブラウザ](http://localhost:3000/learning_records/new) で動作確認
+
+☑️ 正常に記録されると `show` ページへ遷移し、"学習記録を保存しました" と表示される
+
+☑️ NOT NULL 制約に違反するとエラーメッセージがフラッシュで表示される
+
+---
