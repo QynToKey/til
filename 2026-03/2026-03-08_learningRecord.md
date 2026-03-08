@@ -256,21 +256,18 @@ touch app/views/learning_records/new.html.erb
 
 <%= form_with model: @learning_record do |f| %>
   <div>
-    <%= f.label :content %><br>
-    <%= f.text_area :content, rows: 4 %><br>
-    <small>学習内容</small>
+    <%= f.label :content, "学習内容" %><br>
+    <%= f.text_area :content, rows: 4 %>
   </div>
 
   <div>
-    <%= f.label :duration_minutes %><br>
-    <%= f.number_field :duration_minutes, min: 0 %><br>
-    <small>学習時間（分）</small>
+    <%= f.label :duration_minutes, "学習時間（分）" %><br>
+    <%= f.number_field :duration_minutes, min: 0 %>
   </div>
 
   <div>
-    <%= f.label :study_date %><br>
-    <%= f.date_field :study_date %><br>
-    <small>日付</small>
+    <%= f.label :study_date, "日付" %><br>
+    <%= f.date_field :study_date %>
   </div>
 
   <div>
