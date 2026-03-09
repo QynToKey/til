@@ -15,11 +15,13 @@
 
 👉 *自分の学習記録（= `current_user`）のみを取得し、新しい記録から降順に並べる）*
 
-### ビューを作成
+### `index` ビューを作成
 
 ```bash
 touch app/views/learning_records/index.html.erb
 ```
+
+⬇️
 
 ```ruby
 # touch app/views/learning_records/index.html.erb
@@ -39,13 +41,13 @@ touch app/views/learning_records/index.html.erb
   <tbody>
     <% @learning_records.each do |record| %>
       <tr>
+        # 学習した日を「年月日」で取得して表示
         <td><%= record.study_date.strftime('%Y-%m-%d') %></td>
         <td><%= record.content %></td>
         <td><%= record.duration_minutes %></td>
         <td>
           <%= link_to '編集', edit_learning_record_path(record) %>
-          # ⬇️ Rails 7からTurboが導入されたためこう書く
-          <%= link_to '削除', learning_record_path(record), data: { turbo_method: :delete, turbo_confirm: '本当に削除しますか？' } %>
+          <%= link_to '削除', learning_record_path(record), data: { turbo_method: :delete, turbo_confirm: '本当に削除しますか？' } %> # ⬅️ Rails 7からTurboが導入されたためこう書く
         </td>
       </tr>
     <% end %>
@@ -54,3 +56,107 @@ touch app/views/learning_records/index.html.erb
 ```
 
 ---
+
+## 2️⃣ 編集機能
+
+### コントローラーに `edit` / `update` 機能を追加
+
+```ruby
+# app/controllers/learning_records_controller.rb
+  def edit
+    # ユーザーが所有する学習記録のみを編集できるようにする
+    @learning_record = current_user.learning_records.find(params[:id])
+  end
+
+  def update
+    @learning_record = current_user.learning_records.find(params[:id])
+
+    if @learning_record.update(learning_record_params)
+      redirect_to @learning_record, notice: "学習記録を更新しました"
+    else
+      flash.now[:alert] = "学習記録の更新に失敗しました"
+      render :edit, status: :unprocessable_entity
+    end
+  end
+```
+
+### `edit` ビューを作成
+
+```bash
+touch app/views/learning_records/edit.html.erb
+```
+
+⬇️
+
+```ruby
+# app/controllers/learning_records_controller.rb
+<h1><%= @learning_record.study_date.strftime('%Y/%m/%d') %> の学習記録</h1>
+
+<% if @learning_record.errors.any? %>
+  <div style="color: red;">
+    <h2><%= @learning_record.errors.count %>件のエラーがあります</h2>
+    <ul>
+      <% @learning_record.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with model: @learning_record do |f| %>
+  <div>
+    <%= f.label :content, "学習内容" %><br>
+    <%= f.text_area :content, rows: 4 %>
+  </div>
+
+  <div>
+    <%= f.label :duration_minutes, "学習時間（分）" %><br>
+    <%= f.number_field :duration_minutes, min: 0 %>
+  </div>
+
+  <div>
+    <%= f.label :study_date, "日付" %><br>
+    <%= f.date_field :study_date %>
+  </div>
+
+  <div>
+    <%= f.submit "更新する" %>
+    <%= link_to 'キャンセル', learning_record_path(@learning_record) %>
+  </div>
+<% end %>
+```
+
+---
+
+## 3️⃣ 仮置きした `show` ビューを更新
+
+```ruby
+<h1><%= @learning_record.study_date.strftime('%Y/%m/%d') %> の学習記録</h1>
+
+<p>学習内容: <%= @learning_record.content %></p>
+<p>学習時間: <%= @learning_record.duration_minutes %> 分</p>
+
+<%= link_to '編集', edit_learning_record_path(@learning_record) %>
+<%= link_to 'ログ一覧', learning_records_path %>
+```
+
+---
+
+## 4️⃣ 削除機能
+
+### コントローラーに `destroy` アクションを追加
+
+```ruby
+# app/controllers/learning_records_controller.rb
+  def destroy
+    @learning_record = current_user.learning_records.find(params[:id])
+    @learning_record.destroy
+    redirect_to learning_records_path, notice: "学習記録を削除しました"
+  end
+```
+
+👉 *削除ダイアログは、`index.html.erb` の削除リンクに書いた `turbo_confirm` によって実行される*
+
+---
+
+## 5️⃣ パーシャルで動線を管理
