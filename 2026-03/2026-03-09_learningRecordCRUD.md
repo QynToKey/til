@@ -202,3 +202,17 @@ touch app/views/learning_records/_form.html.erb
 👉 *`f.submit` は、モデルの状態（新規か既存か）を自動で判断してラベルを切り替えてくれる*
 
 ### `new` / `edit` で読み込む
+
+```ruby
+# app/views/learning_records/new.html.erb
+<%= render 'form', learning_record: @learning_record, return_path: learning_records_path %>
+```
+
+👉 *`return_path`で受けて、一覧ページ `learning_records_path` へリダイレクト*
+
+```ruby
+# app/views/learning_records/edit.html.erb
+<%= render 'form', learning_record: @learning_record, return_path: learning_record_path(@learning_record) %>
+```
+
+👉 *`return_path`で受けて、詳細ページ `learning_records_path(@learning_record)` へリダイレクト*
