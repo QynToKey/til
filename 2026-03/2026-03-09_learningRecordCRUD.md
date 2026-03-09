@@ -159,4 +159,46 @@ touch app/views/learning_records/edit.html.erb
 
 ---
 
-## 5️⃣ パーシャルで動線を管理
+## 5️⃣ ビューの共通部分をパーシャル化
+
+### パーシャルを作成
+
+```bash
+touch app/views/learning_records/_form.html.erb
+```
+
+⬇️
+
+```ruby
+# app/views/learning_records/_form.html.erb
+
+<%= form_with model: learning_record do |f| %>
+  <div>
+    <%= f.label :content, "学習内容" %><br>
+    <%= f.text_area :content, rows: 4 %>
+  </div>
+
+  <div>
+    <%= f.label :duration_minutes, "学習時間（分）" %><br>
+    <%= f.number_field :duration_minutes, min: 0 %>
+  </div>
+
+  <div>
+    <%= f.label :study_date, "日付" %><br>
+    <%= f.date_field :study_date %>
+  </div>
+
+  <div>
+    <%= f.submit %>
+    <%= link_to "戻る", return_path %>
+  </div>
+<% end %>
+```
+
+👉 *１行目は、ローカル変数を受け取るので `@` を外して `<%= form_with model: learning_record do |f| %>` とする*
+
+👉 *ボタンとリンクが `new` と `edit` で異なるため、パーシャルにローカル変数 `return_path` として渡す*
+
+👉 *`f.submit` は、モデルの状態（新規か既存か）を自動で判断してラベルを切り替えてくれる*
+
+### `new` / `edit` で読み込む
