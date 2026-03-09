@@ -89,7 +89,7 @@ touch app/views/learning_records/edit.html.erb
 ⬇️
 
 ```ruby
-# app/controllers/learning_records_controller.rb
+# app/views/learning_records/edit.html.erb
 <h1><%= @learning_record.study_date.strftime('%Y/%m/%d') %> の学習記録</h1>
 
 <% if @learning_record.errors.any? %>
@@ -189,7 +189,7 @@ touch app/views/learning_records/_form.html.erb
   </div>
 
   <div>
-    <%= f.submit %>
+    <%= f.submit learning_record.new_record? ? "記録する" : "更新する" %>
     <%= link_to "戻る", return_path %>
   </div>
 <% end %>
@@ -199,7 +199,7 @@ touch app/views/learning_records/_form.html.erb
 
 👉 *ボタンとリンクが `new` と `edit` で異なるため、パーシャルにローカル変数 `return_path` として渡す*
 
-👉 *`f.submit` は、モデルの状態（新規か既存か）を自動で判断してラベルを切り替えてくれる*
+👉 *`f.submit` は、モデルの状態（新規か既存か）を判断してラベルを切り替えてる*
 
 ### `new` / `edit` で読み込む
 
@@ -215,7 +215,7 @@ touch app/views/learning_records/_form.html.erb
 <%= render 'form', learning_record: @learning_record, return_path: learning_record_path(@learning_record) %>
 ```
 
-👉 *`return_path`で受けて、詳細ページ `learning_records_path(@learning_record)` へリダイレクト*
+👉 *`return_path`で受けて、詳細ページ `learning_record_path(@learning_record)` へリダイレクト*
 
 ---
 
@@ -223,3 +223,4 @@ touch app/views/learning_records/_form.html.erb
 
 - `label` / `f.submit` は一通りの実装が終了した後に `i18n`
 で設定する
+- 「タグ別フィルタリング」および「累計時間集計」は Tag 機能実装時に対応する
