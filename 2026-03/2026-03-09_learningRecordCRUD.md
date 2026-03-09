@@ -216,3 +216,10 @@ touch app/views/learning_records/_form.html.erb
 ```
 
 👉 *`return_path`で受けて、詳細ページ `learning_records_path(@learning_record)` へリダイレクト*
+
+---
+
+## 今後の作業
+
+- `label` / `f.submit` は一通りの実装が終了した後に `i18n`
+で設定する
