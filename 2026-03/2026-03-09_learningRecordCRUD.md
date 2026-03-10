@@ -159,7 +159,27 @@ touch app/views/learning_records/edit.html.erb
 
 ---
 
-## 5️⃣ ビューの共通部分をパーシャル化
+## 5️⃣ コントローラーのコードをリファクタリング
+
+👉 *`show` / `edit` / `update` / `destroy` の1行目がすべて同じコードになっているのを `private` に切り出す*
+
+```ruby
+# コールバックで各アクションの実行前にメソッドを挿入
+before_action :set_learning_record, only: %i[show edit update destroy]
+
+・・・
+
+private
+
+def set_learning_record
+  # ユーザーが所有する学習記録を作成する
+  @learning_record = current_user.learning_records.find(params[:id])
+end
+```
+
+---
+
+## 6️⃣ ビューの共通部分をパーシャル化
 
 ### パーシャルを作成
 
