@@ -2,22 +2,24 @@
 
 ---
 
-## 前提
+## 設計変更の理由
 
-- 現行設計では LearningTheme が主役になっており、本来の主役として想定している **LearningRecord はこれに従属する**関係になっている。
+- 当初設計では、本来の主軸データとして想定してい `LearningRecord` が `LearningTheme` に従属する関係になっている。
 
-```text
+```bash
+# 当初設計
 users
  └ learning_themes
      ├ learning_records
      └ todos
 ```
 
-- ユーザーが LearningRecord を記録する際、現行設計では LearningTheme によってデータを管理する現行設計は**カテゴリを固定してしまう**ため、日々の記録作業の制約になりかねない。
+- 当初設計は `LearningTheme` がカテゴリを固定してしまうため、ユーザーが日々の `LearningRecord` を記録する際の制約になりかねないと判断し、より柔軟なデータ分類を可能にするため `Tag` による多対多構造へ設計変更することとした。
 
 ⬇️ *以上を勘案し、Tag 構造へのリファクタリングを行うこととする*
 
-```text
+```bash
+# リファクタリング後
 users
  └ learning_records
        └ record_tags
