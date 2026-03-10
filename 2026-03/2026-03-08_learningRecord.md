@@ -183,7 +183,7 @@ $ docker compose exec web rails g controller LearningRecords
 
 ```ruby
 class LearningRecordsController < ApplicationController
-  skip_before_action :require_login, only: %i[new index]
+  skip_before_action :require_login, only: %i[new]
 
   def new
     # デフォルトで今日の日付をセットする
