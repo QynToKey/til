@@ -172,7 +172,7 @@ before_action :set_learning_record, only: %i[show edit update destroy]
 private
 
 def set_learning_record
-  # ユーザーが所有する学習記録を作成する
+  # ユーザーが所有する学習記録を取得する
   @learning_record = current_user.learning_records.find(params[:id])
 end
 ```
