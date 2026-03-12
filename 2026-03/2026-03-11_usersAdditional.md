@@ -64,7 +64,7 @@ end
 
 ---
 
-### 3️⃣ ログインユーザーへ表示するヘッダーに「設定」への動線を追加
+### 3️⃣ ログインユーザーへ表示するヘッダーに「マイページ」への動線を追加
 
 ```ruby
 # app/views/shared/_header.html.erb
@@ -72,7 +72,7 @@ end
     <% if logged_in? %>
       <%= link_to "HOME", root_path %> |
       # id には current_user を渡す
-      <%= link_to "設定", edit_user_path(current_user) %> |
+      <%= link_to "マイページ", edit_user_path(current_user) %> |
       <%= link_to "ログアウト", logout_path, data: { turbo_method: :delete } %>
     <% else %>
       <%= link_to "HOME", root_path %> |
@@ -82,11 +82,75 @@ end
   </nav>
 ```
 
+👉 *「ユーザー情報編集」ページへの動線は、当該ページでも表示されるため、違和感のない呼称として「マイページ」としておく*
+
 ---
 
 ### 4️⃣ 「ユーザー設定」画面を作成
 
 ```bash
+touch app/views/users/edit.html.erb
+```
+
+⬇️
+
+```ruby
+<h1>マイページ</h1>
+
+<% if @user.errors.any? %>
+  <div style="color: red;">
+    <h2><%= @user.errors.count %>件のエラーがあります</h2>
+    <ul>
+      <% @user.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with model: @user do |f| %>
+  <div>
+    <%= f.label :name %><small>（ニックネーム可）</small><br>
+    <%= f.text_field :name %>
+  </div>
+
+  <div>
+    <%= f.label :email %><br>
+    <%= f.email_field :email %>
+  </div>
+
+  <div>
+    <%= f.label :password %><br>
+    <%= f.password_field :password %>
+  </div>
+
+  <div>
+    <%= f.label :password_confirmation %><br>
+    <%= f.password_field :password_confirmation %>
+  </div>
+
+  <div>
+    <%= f.submit "更新" %>
+  </div>
+
+    <%= button_to "学習ログへ戻る",  learning_records_path, method: :get %>
+    <%= button_to "削除", user_path(@user), method: :delete,
+    data: { turbo_confirm: "本当に削除しますか？" } %>
+<% end %>
+
+```
+
+---
+
+### 5️⃣ `destroy` アクションを修正
+
+```ruby
+  def destroy
+    @user.destroy
+    # ⬇️ Sorcery でログアウトするメソッドを追加
+    logout
+    redirect_to root_path, notice: "ユーザーを削除しました"
+  end
 ```
 
 ---
