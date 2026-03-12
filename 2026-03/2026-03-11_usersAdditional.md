@@ -12,7 +12,7 @@ resources :users, only: %i[new create edit update destroy]
 
 ---
 
-### コントローラーに `edit` / `update` / `destroy` を追加
+### 2️⃣ コントローラーに `edit` / `update` / `destroy` を追加
 
 ```ruby
 class UsersController < ApplicationController
@@ -27,7 +27,8 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save
-      redirect_to root_path, notice: "登録が完了しました"
+      # 新規登録後は「今日の記録」へ遷移する
+      redirect_to new_learning_record_path, notice: "登録が完了しました"
     else
       render :new, status: :unprocessable_entity
     end
@@ -59,6 +60,33 @@ class UsersController < ApplicationController
     @user = current_user
   end
 end
+```
+
+---
+
+### 3️⃣ ログインユーザーへ表示するヘッダーに「設定」への動線を追加
+
+```ruby
+# app/views/shared/_header.html.erb
+  <nav>
+    <% if logged_in? %>
+      <%= link_to "HOME", root_path %> |
+      # id には current_user を渡す
+      <%= link_to "設定", edit_user_path(current_user) %> |
+      <%= link_to "ログアウト", logout_path, data: { turbo_method: :delete } %>
+    <% else %>
+      <%= link_to "HOME", root_path %> |
+      <%= link_to "ログイン", login_path %> |
+      <%= link_to "新規登録", new_user_path %>
+    <% end %>
+  </nav>
+```
+
+---
+
+### 4️⃣ 「ユーザー設定」画面を作成
+
+```bash
 ```
 
 ---
