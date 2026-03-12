@@ -62,3 +62,24 @@ end
 ```
 
 ---
+
+## DB の保存先を Neon に移行
+
+Render の PostgreSQL の無料枠には期限があるため、Neon に移行した。
+
+### 1️⃣ Neon の `Connection string` を取得
+
+- GitHub アカウントでサインイン
+- 初期設定（PostgreSQL のバージョンは最新を指定）
+- Project dashboard から `Connection string` を開き、文字列をコピー
+
+### 2️⃣ Render の `DATABASE_URL` に文字列をペースト
+
+- Render の **Dashboard > 当該 Project > MANAGE > Environment** を開く
+- **Environment Variables** の `DATABASE_URL` を編集し、Neon で取得した `Connection string` をペースト
+
+⬇️
+
+「Save」すると自動でデプロイが始まるので、エラーにならなければ成功
+
+⚠️ *新しい DB を使うため既存データは引き継がれないので注意*
