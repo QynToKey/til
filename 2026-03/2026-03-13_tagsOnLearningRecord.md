@@ -72,3 +72,34 @@ SELECT * FROM tags WHERE record_id = 3;
 👉 *2回の SQL で完結する*
 
 ---
+
+## 8️⃣ タグによるフィルタリング機能を実装
+
+👉 *実装イメージ：ユーザーがタグをクリックすると、そのタグが付いた記録だけに絞り込まれる*
+
+### `index` アクションにフィルタリング機能を実装
+
+```ruby
+# app/controllers/learning_records_controller.rb
+  def index
+    ・・・
+
+    if params[:tag_id].present?
+      # タグIDが指定されている場合は、そのタグが付いている学習記録のみを表示する
+      @learning_records = @learning_records.joins(:tags).where(tags: { id: params[:tag_id] })
+    end
+  end
+```
+
+📝 `joins(:tags)` ：
+ `learning_records` と `tags` を JOIN する
+
+| メソッド | 働き |
+| --- | --- |
+| `includes` | 関連データの事前読み込み |
+| `joins` | 絞り込みのためのSQL結合 |
+
+📝 `.where(tags: { id: params[:tag_id] })` ：
+「指定されたIDのタグが付いている記録のみ」に絞り込む
+
+---
