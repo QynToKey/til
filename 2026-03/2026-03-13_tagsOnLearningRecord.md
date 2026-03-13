@@ -149,3 +149,20 @@ SELECT * FROM tags WHERE record_id = 3;
 👉 *[複数タグの組み合わせによる累計時間集計機能](https://github.com/users/QynToKey/projects/5/views/1#:~:text=%E8%A4%87%E6%95%B0%E3%82%BF%E3%82%B0%E3%81%AE%E7%B5%84%E3%81%BF%E5%90%88%E3%82%8F%E3%81%9B%E3%81%AB%E3%82%88%E3%82%8B%E7%B4%AF%E8%A8%88%E6%99%82%E9%96%93%E9%9B%86%E8%A8%88%E6%A9%9F%E8%83%BD) の実装は MVP 後に検討する*
 
 ---
+
+### `index` ビューで「タグ別累計時間」を表示
+
+```ruby
+# app/views/learning_records/index.html.erb
+<% if params[:tag_id].present? %>
+  <p>このタグのついた学習ログの累計: <%= (current_user.total_learning_minutes_by_tag(Tag.find(params[:tag_id])) / 60.0).round(1) %> 時間</p>
+  <%= link_to "全件表示へ戻る", learning_records_path %>
+<% end %>
+```
+
+📝 `(current_user.total_learning_minutes_by_tag(Tag.find(params[:tag_id])) / 60.0).round(1)` ：
+
+- `/ 60.0` ： *割る数を少数にすれば、演算結果は少数で返ってくる*
+- `.round(1)` ： *四捨五入して小数点１位までを表示*
+
+---
