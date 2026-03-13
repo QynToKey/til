@@ -108,3 +108,23 @@ SELECT * FROM tags WHERE record_id = 3;
 - タグ指定なし → `includes` で全件取得
 
 ---
+
+### `index` ビューに「タグ」のリンクを実装
+
+```ruby
+# app/views/learning_records/index.html.erb
+
+        # タグ名をクリックすると、そのタグが付いている学習記録の一覧に遷移する
+        <td>
+          <% record.tags.each do |tag| %>
+            <span><%= link_to tag.name, learning_records_path(tag_id: tag.id) %></span>
+          <% end %>
+        </td>
+
+・・・
+
+# タグで絞り込んでいる場合は全件表示へのリンクを表示する
+<% if params[:tag_id].present? %>
+  <%= link_to "全件表示へ戻る", learning_records_path %>
+<% end %>
+```
