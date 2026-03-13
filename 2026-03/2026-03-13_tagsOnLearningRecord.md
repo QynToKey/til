@@ -140,17 +140,12 @@ SELECT * FROM tags WHERE record_id = 3;
 ```ruby
 # app/models/user.rb
 
-  # ユーザーの全学習時間を計算する
-  def total_learning_minutes
-    learning_records.sum(:duration_minutes)
-  end
-
   # 指定したタグが付いている学習時間の合計を計算する
   def total_learning_minutes_by_tag(tag)
     learning_records.joins(:tags).where(tags: { id: tag.id }).sum(:duration_minutes)
   end
 ```
 
-📝 「全体」と「タグ別」を分けるのは、責務を小さく保つためのコツ
+👉 *[複数タグの組み合わせによる累計時間集計機能](https://github.com/users/QynToKey/projects/5/views/1#:~:text=%E8%A4%87%E6%95%B0%E3%82%BF%E3%82%B0%E3%81%AE%E7%B5%84%E3%81%BF%E5%90%88%E3%82%8F%E3%81%9B%E3%81%AB%E3%82%88%E3%82%8B%E7%B4%AF%E8%A8%88%E6%99%82%E9%96%93%E9%9B%86%E8%A8%88%E6%A9%9F%E8%83%BD) の実装は MVP 後に検討する*
 
 ---
