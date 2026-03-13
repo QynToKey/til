@@ -102,4 +102,9 @@ SELECT * FROM tags WHERE record_id = 3;
 📝 `.where(tags: { id: params[:tag_id] })` ：
 「指定されたIDのタグが付いている記録のみ」に絞り込む
 
+⬇️ 実行される流れはこうなる
+
+- タグ指定あり → `includes` で取得 → `joins` で絞り込み
+- タグ指定なし → `includes` で全件取得
+
 ---
