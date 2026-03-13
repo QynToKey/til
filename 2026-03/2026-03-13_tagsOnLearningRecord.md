@@ -19,15 +19,15 @@
 *タグがすでに付いていればチェック済みで表示し、チェックされたらそのIDを送信する*
 
 - `tag_ids` ：
-送信するパラメータの名前。`learning_record[tag_ids][]` という形でサーバーに送られる
+*送信するパラメータの名前。`learning_record[tag_ids][]` という形でサーバーに送られる*
 - `multiple: true` ：
-複数のチェックボックスから配列として値を送信するための指定
+*複数のチェックボックスから配列として値を送信するための指定*
 - `checked: learning_record.tags.include?(tag)` ：
-編集時に「すでにこのタグが付いているか」を確認して、チェック済み状態にするかどうかを決める *（新規作成時は `false`）*
+*編集時に「すでにこのタグが付いているか」を確認して、チェック済み状態にするかどうかを決める （新規作成時は `false`）*
 - `tag.id` ：
-チェックされたときに送信される値 *（どのタグが選ばれたかをIDで識別する）*
+*チェックされたときに送信される値 （どのタグが選ばれたかをIDで識別する）*
 - `false` ：
-チェックされていないときに送信される値  *（通常は `0` や `false` を指定して「未選択」を明示する。 `false` のとき、未チェック時は何も送信されない）*
+*チェックされていないときに送信される値  （通常は `0` や `false` を指定して「未選択」を明示する。 `false` のとき、未チェック時は何も送信されない）*
 
 ---
 
@@ -164,5 +164,30 @@ SELECT * FROM tags WHERE record_id = 3;
 
 - `/ 60.0` ： *割る数を少数にすれば、演算結果は少数で返ってくる*
 - `.round(1)` ： *四捨五入して小数点１位までを表示*
+
+---
+
+### `Tag.find(params[:tag_id])` を `@current_tag` にリファクタリング
+
+- LearningRecordsController に `@current_tag` を追加
+
+```ruby
+# app/controllers/learning_records_controller.rb
+  def index
+    ・・・
+
+    if params[:tag_id].present?
+      # ユーザーが所有するタグの中から、指定されたタグIDに該当するタグを見つける
+      @current_tag = current_user.tags.find(params[:tag_id])
+      @learning_records = @learning_records.joins(:tags).where(tags: { id: params[:tag_id] })
+    end
+  end
+```
+
+- ビューに `@current_tag` を実装
+
+```ruby
+<%= (current_user.total_learning_minutes_by_tag(@current_tag) / 60.0).round(1) %>
+```
 
 ---
