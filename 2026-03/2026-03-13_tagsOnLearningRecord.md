@@ -128,3 +128,29 @@ SELECT * FROM tags WHERE record_id = 3;
   <%= link_to "全件表示へ戻る", learning_records_path %>
 <% end %>
 ```
+
+---
+
+## 9️⃣ 累計時間の計算ロジックを実装
+
+### `user.rb` にメソッドを実装
+
+👉 *データに関わる計算はモデルの責務*
+
+```ruby
+# app/models/user.rb
+
+  # ユーザーの全学習時間を計算する
+  def total_learning_minutes
+    learning_records.sum(:duration_minutes)
+  end
+
+  # 指定したタグが付いている学習時間の合計を計算する
+  def total_learning_minutes_by_tag(tag)
+    learning_records.joins(:tags).where(tags: { id: tag.id }).sum(:duration_minutes)
+  end
+```
+
+📝 「全体」と「タグ別」を分けるのは、責務を小さく保つためのコツ
+
+---
