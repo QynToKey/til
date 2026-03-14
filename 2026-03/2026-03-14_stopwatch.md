@@ -76,9 +76,9 @@
 
 ---
 
-### 実装済みコードの修正
+## 1️⃣ 不要となる「実装済みコード」の整理
 
-- `app/models/learning_record.rb`
+### `app/models/learning_record.rb`
 
 ```ruby
 ⬇️ 削除
@@ -107,4 +107,67 @@
   end
 ```
 
-👉 *`calculate_duration` は役割を変えて必要になるため、JS 実装後にあらためて実装する*
+---
+
+### `app/controllers/learning_records_controller.rb`
+
+```ruby
+  def learning_record_params
+    params.require(:learning_record).permit(:study_date, :content, :duration_minutes, tag_ids: [])
+  end
+```
+
+👉 *カラム `:started_at` / `:ended_at` を削除*
+
+---
+
+### `started_at` / `ended_at` カラムを削除するマイグレーション
+
+```bash
+$ docker compose exec web rails g migration RemoveStartedAtAndEndedAtFromLearningRecords started_at:datetime ended_at:datetime
+      invoke  active_record
+      create    db/migrate/20260314094024_remove_started_at_and_ended_at_from_learning_records.rb
+```
+
+👉 *`rails g migration Removeカラム名Fromテーブル名 カラム名:型名`*
+
+⬇️ 生成されたマイグレーションファイルを確認
+
+```ruby
+class RemoveStartedAtAndEndedAtFromLearningRecords < ActiveRecord::Migration[7.2]
+  def change
+    remove_column :learning_records, :started_at, :datetime
+    remove_column :learning_records, :ended_at, :datetime
+  end
+end
+```
+
+⬇️ `db:migrate` を実行
+
+```bash
+$ docker compose exec web ra
+ils db:migrate
+== 20260314094024 RemoveStartedAtAndEndedAtFromLearningRecords: migrating =====
+-- remove_column(:learning_records, :started_at, :datetime)
+   -> 0.0161s
+-- remove_column(:learning_records, :ended_at, :datetime)
+   -> 0.0014s
+== 20260314094024 RemoveStartedAtAndEndedAtFromLearningRecords: migrated (0.0176s)
+```
+
+⬇️ `db/schema.rb` で LearningRecord テーブルから `started_at` / `ended_at` カラムが消えていることを確認
+
+```ruby
+# db/schema.rb
+  create_table "learning_records", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "study_date", null: false
+    t.integer "duration_minutes"
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_learning_records_on_user_id"
+  end
+```
+
+---
