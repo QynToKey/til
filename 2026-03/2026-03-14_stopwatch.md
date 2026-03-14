@@ -24,6 +24,8 @@
   - `duration_minutes` の加算処理 : 1sp
 ```
 
+---
+
 ### 関連ドキュメントの修正
 
 - `README.md`
@@ -71,3 +73,38 @@
         datetime updated_at
     }
 ```
+
+---
+
+### 実装済みコードの修正
+
+- `app/models/learning_record.rb`
+
+```ruby
+⬇️ 削除
+  # 開始時間と終了時間の両方が存在する場合、終了時間は開始時間より後でなければならない
+  validate :ended_at_after_started_at
+```
+
+```ruby
+⬇️ 丸ごと削除
+  private
+
+  # 開始時間と終了時間から学習時間を計算して duration_minutes にセットする
+  def calculate_duration
+    if started_at.present? && ended_at.present?
+      self.duration_minutes = ((ended_at - started_at) / 60).to_i
+    end
+  end
+
+  # 終了時間は開始時間より後でなければならない
+  def ended_at_after_started_at
+    return if started_at.blank? || ended_at.blank?
+
+    if ended_at <= started_at
+      errors.add(:ended_at, "は開始時間より後の時刻を入力してください")
+    end
+  end
+```
+
+👉 *`calculate_duration` は役割を変えて必要になるため、JS 実装後にあらためて実装する*
