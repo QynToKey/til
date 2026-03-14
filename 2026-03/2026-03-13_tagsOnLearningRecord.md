@@ -155,7 +155,7 @@ SELECT * FROM tags WHERE record_id = 3;
 ```ruby
 # app/views/learning_records/index.html.erb
 <% if params[:tag_id].present? %>
-  <p>このタグのついた学習ログの累計: <%= (current_user.total_learning_minutes_by_tag(Tag.find(params[:tag_id])) / 60.0).round(1) %> 時間</p>
+  <p>'<%= @current_tag.name %>' の学習時間累計： <%= (current_user.total_learning_minutes_by_tag(Tag.find(params[:tag_id])) / 60.0).round(1) %> 時間</p>
   <%= link_to "全件表示へ戻る", learning_records_path %>
 <% end %>
 ```
@@ -189,5 +189,66 @@ SELECT * FROM tags WHERE record_id = 3;
 ```ruby
 <%= (current_user.total_learning_minutes_by_tag(@current_tag) / 60.0).round(1) %>
 ```
+
+---
+
+## 🔟 タグ未設定ユーザーへのメッセージを表示
+
+### 現状
+
+ユーザーが初めて「今日の記録」を入力する際、当然ながらタグが１つも登録がないため、そのまま記録作業を進めた場合「タグ機能」を使う機会を得られない。
+
+### 対応
+
+#### a案） LearningRecord を NOT NULL にする
+
+➡️ 「タグなしでは記録できない」という制約がユーザー体験に制限を与えてしまう
+
+#### b案） 初回ログイン時にデフォルトタグを自動生成する
+
+➡️ やや不自然
+
+#### c案）「タグ未設定」の記録も許容しつつ、タグ登録を促すメッセージを表示する
+
+➡️ 設計思想と合致するので、これを採用
+
+### ビューへの実装
+
+- 一覧画面
+
+```ruby
+# app/views/learning_records/index.html.erb
+<% if current_user.learning_records.present? && current_user.tags.empty? %>
+  <p>タグがありません。タグを追加して学習ログを管理しましょう！</p>
+  <%= link_to 'タグを追加する', new_tag_path %>
+<% end %>
+```
+
+👉 *「学習記録が存在」かつ「タグ未設定」のときだけメッセージを表示する*
+
+- フォームビュー
+
+```ruby
+# app/views/learning_records/_form.html.erb
+  <div>
+    <%= f.label :tag_ids, "タグ" %><br>
+    <% if current_user.tags.empty? %>
+      <p>※ タグを先に<%= link_to 'タグ管理画面', tags_path %>から追加してください。</p>
+    <% else %>
+      <% current_user.tags.each do |tag| %>
+        ・・・
+      <% end %>
+    <% end %>
+  </div>
+```
+
+👉 *「タグ未設定」のときのみメッセージを表示し、別窓でのタグの登録を促す*
+
+### 付記
+
+**別窓で処理を行う場合、以下のような問題が残る**が MVP 後に対応する。
+
+- ユーザーには別窓が開かれたことがわからない
+- タグを作成しても、学習記録の入力画面をリロードしないと作成されたタグが反映されない
 
 ---
