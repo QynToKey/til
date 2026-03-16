@@ -207,3 +207,9 @@ export default class extends Controller {
 👉 *パーシャル側の `data-controller= "stopwatch"` は削除する*
 
 ---
+
+### 付記
+
+※ Issue 「`duration_minutes` の加算処理」は、設計変更により、受け渡し処理と統合された
+
+---
