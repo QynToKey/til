@@ -28,3 +28,22 @@ touch app/views/learning_records/_stopwatch.html.erb
 ```
 
 ---
+
+## 3️⃣ `stopwatch_controller.js`ファイルを作成
+
+👉 *「ストップウォッチ」は学習で作成した JavaScript で実装する*
+
+```bash
+touch app/javascript/controllers/stopwatch_controller.js
+```
+
+```ruby
+# app/javascript/controllers/stopwatch_controller.js
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  connect() {
+    console.log("stopwatch connected!")
+  }
+}
+```
