@@ -27,19 +27,22 @@
 
 ```html
 <div class="container" data-controller="stopwatch">
-  <div id="timer" data-stopwatch-target="timer">00:00</div>
+  <div data-stopwatch-target="timer">00:00</div>
   <div class="controllers">
-    <div class="btn" id="start" data-stopwatch-target="start">START</div>
-    <div class="btn" id="stop" data-stopwatch-target="stop">STOP</div>
-    <div class="btn" id="reset" data-stopwatch-target="reset">RESET</div>
+    <div class="btn" data-stopwatch-target="start" data-action="click->stopwatch#start">START</div>
+    <div class="btn" data-stopwatch-target="stop" data-action="click->stopwatch#stop">STOP</div>
+    <div class="btn" data-stopwatch-target="reset" data-action="click->stopwatch#reset">RESET</div>
   </div>
 </div>
 ```
 
-| 属性 | 働き |
-| --- | --- |
-| `data-controller="stopwatch"` | この HTML に `stopwatch_controller.js` を紐づける |
-| `data-stopwatch-target="要素"` | JS側で `this.[要素]Target` として参照できる |
+👉 *ID 指定 `id='xxxx` は不要*
+
+| 属性 | 働き | 静的サイトでの JS コード |
+| --- | --- | --- |
+| `data-controller="stopwatch"` | この HTML に `stopwatch_controller.js` を紐づける | `<script src="js/main.js"></script>` に相当 |
+| `data-stopwatch-target="要素"` | JS側で `this.[要素]Target` として参照できる | `document.getElementById("要素")` に相当 |
+| `data-action="click->stopwatch#start"` | `[イベント名]->[コントローラ名]#[メソッド名]` でイベントを設定 | `addEventListener()` に相当 |
 
 - JavaScript 側 `app/javascript/controllers/stopwatch_controller.js`
 
@@ -63,6 +66,8 @@ export default class extends Controller {
 }
 ```
 
-👉 *`console.log()` で要素が取得できていることをコンソールで確認*
+👉 *一旦、`console.log()` で要素が取得できていることをコンソールで確認*
 
 ---
+
+###
