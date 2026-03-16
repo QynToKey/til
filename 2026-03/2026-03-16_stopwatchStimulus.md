@@ -23,7 +23,9 @@
 
 ### DOM 要素を取得
 
-- ビュー側 'app/views/learning_records/_stopwatch.html.erb'
+#### ビュー側 `app/views/learning_records/_stopwatch.html.erb`
+
+📝 Stimulusのターゲットは **`data-controller` が付いている要素の内側**にある必要がある
 
 ```html
 <div class="container" data-controller="stopwatch">
@@ -44,7 +46,7 @@
 | `data-stopwatch-target="要素"` | JS側で `this.[要素]Target` として参照できる | `document.getElementById("要素")` に相当 |
 | `data-action="click->stopwatch#start"` | `[イベント名]->[コントローラ名]#[メソッド名]` でイベントを設定 | `addEventListener()` に相当 |
 
-- JavaScript 側 `app/javascript/controllers/stopwatch_controller.js`
+#### JavaScript 側 `app/javascript/controllers/stopwatch_controller.js`
 
 ```javascript
 export default class extends Controller {
@@ -150,5 +152,58 @@ export default class extends Controller {
   }
 }
 ```
+
+---
+
+## 5️⃣ `duration_minutes` の受け渡し処理
+
+### DOM 要素の取得
+
+#### ビュー側 `app/views/learning_records/_form.html.erb`
+
+👉 *`f.number_field` に `data` 属性を追加する*
+
+```html
+  <div>
+    <%= f.label :duration_minutes, "学習時間（分）" %><br>
+    <%= f.number_field :duration_minutes, min: 0, data: { stopwatch_target: "durationMinutes" } %>
+  </div>
+```
+
+#### JavaScript 側 `stopwatch_controller.js`
+
+👉 *`static targets` に要素を追加*
+
+```javascript
+  static targets = ["timer", "start", "stop", "reset", "durationMinutes"]
+```
+
+---
+
+### `duration_minutes` の受け渡し処理を実装
+
+👉 *ストップウォッチを「停止」したときに「経過時間」を記録したいので、`stop()` メソッド内に実装する*
+
+```javascript
+  stop() {
+    ・・・
+    this.durationMinutesTarget.value = Math.floor(this.elapsedTime / 60000); // 経過時間を分単位でフォームにセット
+  }
+```
+
+### ビューと JS を紐づける
+
+```ruby
+# app/views/learning_records/new.html.erb
+<h1>今日の学習記録</h1>
+
+<div data-controller= "stopwatch">
+  <%= render 'stopwatch' %>
+
+ ・・・
+</div>
+```
+
+👉 *パーシャル側の `data-controller= "stopwatch"` は削除する*
 
 ---
