@@ -21,16 +21,17 @@
 
 ## 4️⃣ `stopwatch_controller.js` を実装
 
-- ビュー側
+### DOM 要素を取得
 
-```ruby
-# app/views/learning_records/_stopwatch.html.erb
+- ビュー側 'app/views/learning_records/_stopwatch.html.erb'
+
+```html
 <div class="container" data-controller="stopwatch">
   <div id="timer" data-stopwatch-target="timer">00:00</div>
   <div class="controllers">
-    <div class="btn" id="start" data-stopwatch-action="start">START</div>
-    <div class="btn" id="stop" data-stopwatch-action="stop">STOP</div>
-    <div class="btn" id="reset" data-stopwatch-action="reset">RESET</div>
+    <div class="btn" id="start" data-stopwatch-target="start">START</div>
+    <div class="btn" id="stop" data-stopwatch-target="stop">STOP</div>
+    <div class="btn" id="reset" data-stopwatch-target="reset">RESET</div>
   </div>
 </div>
 ```
@@ -38,4 +39,23 @@
 | 属性 | 働き |
 | --- | --- |
 | `data-controller="stopwatch"` | この HTML に `stopwatch_controller.js` を紐づける |
-| `data-stopwatch-action="xxxx"` | JavaScript から操作する対象の DOM 要素 |
+| `data-stopwatch-target="要素"` | JS側で `this.[要素]Target` として参照できる |
+
+- JavaScript 側 `app/javascript/controllers/stopwatch_controller.js`
+
+```javascript
+export default class extends Controller {
+  static targets = ["timer", "start", "stop", "reset"]
+
+  connect() {
+    console.log(this.timerTarget)
+    console.log(this.startTarget)
+    console.log(this.stopTarget)
+    console.log(this.resetTarget)
+  }
+}
+```
+
+👉 *`console.log()` で要素が取得できていることをコンソールで確認*
+
+---
