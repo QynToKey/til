@@ -16,3 +16,26 @@
   ⬇️
 3. `stopwatch_controller.js` の処理が動く
 ```
+
+---
+
+## 4️⃣ `stopwatch_controller.js` を実装
+
+- ビュー側
+
+```ruby
+# app/views/learning_records/_stopwatch.html.erb
+<div class="container" data-controller="stopwatch">
+  <div id="timer" data-stopwatch-target="timer">00:00</div>
+  <div class="controllers">
+    <div class="btn" id="start" data-stopwatch-action="start">START</div>
+    <div class="btn" id="stop" data-stopwatch-action="stop">STOP</div>
+    <div class="btn" id="reset" data-stopwatch-action="reset">RESET</div>
+  </div>
+</div>
+```
+
+| 属性 | 働き |
+| --- | --- |
+| `data-controller="stopwatch"` | この HTML に `stopwatch_controller.js` を紐づける |
+| `data-stopwatch-action="xxxx"` | JavaScript から操作する対象の DOM 要素 |
