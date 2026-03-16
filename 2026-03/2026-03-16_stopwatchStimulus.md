@@ -72,7 +72,7 @@ export default class extends Controller {
 
 ### 基本動作を実装
 
-👉 *別途作成済みの StopwatchApp を Stimulus の書式に変換して移植*
+👉 *別途作成済みの [StopwatchApp](https://github.com/QynToKey/MyStopwatch) を Stimulus の書式に変換して移植*
 
 ```javascript
 import { Controller } from "@hotwired/stimulus"
