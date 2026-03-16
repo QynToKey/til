@@ -59,4 +59,6 @@ export default class extends Controller {
 </div>
 ```
 
+👉 *ビュー側に `data-controller="stopwatch"` と書くことで、HTML と JS が紐付く*
+
 ---
