@@ -33,3 +33,7 @@ app/controllers/application_controller.rb
 本修正をデプロイした後、当該ユーザーにアクセスを確認してもらった。
 
 - [x] `iPhone 8` / `Safari iOS 16.7.15` からアクセスできる
+
+---
+
+#### ここまでの総学習時間 ： 1115.2 時間
