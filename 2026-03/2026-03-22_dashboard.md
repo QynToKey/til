@@ -86,4 +86,41 @@ class UsersController < ApplicationController
 
 ---
 
+## 2️⃣ リンクの整理
+
+### ヘッダーの「マイページ」リンクを `users#show` に変更
+
+```ruby
+# app/views/shared/_header.html.erb
+<%= link_to "マイページ", user_path(current_user), class: "nav-link" %>
+```
+
+👉 *パスは `user_path(current_user)`*
+
+### ユーザー登録 / ログイン 後の遷移先を `users#show` に変更
+
+```ruby
+# app/controllers/users_controller.rb
+  def create
+    @user = User.new(user_params)
+
+    if @user.save
+      auto_login(@user)
+      redirect_to user_path(current_user), notice: "登録が完了しました"
+    ・・・
+  end
+```
+
+```ruby
+# app/controllers/user_sessions_controller.rb
+  def create
+    @user = login(params[:email], params[:password])
+
+    if @user
+      redirect_to user_path(current_user), notice: "ログインしました"
+    ・・・
+  end
+```
+
+---
 総学習時間： 1129.8 時間
