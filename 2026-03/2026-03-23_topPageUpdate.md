@@ -104,12 +104,12 @@ end
         <div class="progress-bar bg-dark" style="width: <%= progress %>%;"></div>
       </div>
 
-      <div class="d-flex justify-content-between">
-        <span class="text-muted" style="font-size: 11px;">0</span>
-        <span class="text-muted text-center" style="font-size: 11px;">1,000h<br>初級</span>
-        <span class="text-muted text-center" style="font-size: 11px;">2,500h<br>中級</span>
-        <span class="text-muted text-center" style="font-size: 11px;">5,000h<br>上級</span>
-        <span class="text-muted text-center" style="font-size: 11px;">10,000h<br>エキスパート</span>
+      <div style="position: relative; height: 28px; margin-top: 6px;">
+        <span class="text-muted" style="position: absolute; left: 0%; font-size: 11px; transform: translateX(-50%);">0</span>
+        <span class="text-muted text-center" style="position: absolute; left: 10%; font-size: 11px; transform: translateX(-50%);">1,000h<br>初級</span>
+        <span class="text-muted text-center" style="position: absolute; left: 25%; font-size: 11px; transform: translateX(-50%);">2,500h<br>中級</span>
+        <span class="text-muted text-center" style="position: absolute; left: 50%; font-size: 11px; transform: translateX(-50%);">5,000h<br>上級</span>
+        <span class="text-muted text-center" style="position: absolute; left: 100%; font-size: 11px; transform: translateX(-50%);">10,000h<br>エキスパート</span>
       </div>
 
       <% if @next_threshold %>
@@ -146,6 +146,8 @@ end
 </div>
 ```
 
+👉 *プログレスバーの目盛り(1000 / 2500 / 5000 / 10000)は等間隔ではないため、`position: absolute` で `left` を % 指定する*
+
 ---
 
 ## プログレスバーの実装について
@@ -174,4 +176,4 @@ end
 
 ---
 
-#### 総学習時間：
+#### 総学習時間： 1138.3 時間
