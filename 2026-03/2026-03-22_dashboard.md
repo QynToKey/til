@@ -123,4 +123,5 @@ class UsersController < ApplicationController
 ```
 
 ---
-総学習時間： 1129.8 時間
+
+#### 総学習時間： 1129.8 時間
