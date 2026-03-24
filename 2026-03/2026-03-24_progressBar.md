@@ -82,3 +82,29 @@ touch app/views/shared/_progressbar.html.erb
 ---
 
 ## 4️⃣ マイページにプログレスバーを実装
+
+### `UserController` にプログレスバーを表示するための変数を追加
+
+```ruby
+# app/controllers/users_controller.rb
+
+  def show
+    # プログレスバーを表示するための変数
+    @total_hours = (current_user.total_learning_minutes / 60.0).round(1)
+    @next_threshold = current_user.next_threshold
+
+    ・・・
+  end
+```
+
+### ビューに実装
+
+```erb
+<%# app/views/users/show.html.erb %>
+      <p class='small mt-3'>総学習時間： <%= (current_user.total_learning_minutes / 60.0).round(1) %> 時間</p>
+
+      <%= render "shared/progressbar" %>
+      <%= yield %>
+```
+
+---
