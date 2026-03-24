@@ -54,8 +54,19 @@ touch app/views/shared/_progressbar.html.erb
 ## 3️⃣ プログレスバーをマイルストーンごとに条件分岐
 
 ```erb
-・・・
+<%# 各ステージの上限を 100% として進捗状況を描画 %>
+<% max_hours = if current_user.total_learning_minutes <= 1000 * 60
+                 1000.0
+               elsif current_user.total_learning_minutes <= 2500 * 60
+                 2500.0
+               elsif current_user.total_learning_minutes <= 5000 * 60
+                 5000.0
+               else
+                 10000.0
+               end %>
+<% progress = [(@total_hours / max_hours * 100), 100].min.round(1) %>
 
+<%# 各ステージごとに目盛りの配置を切り替える %>
 <div style="position: relative; height: 28px; margin-top: 6px;">
   <% if current_user.total_learning_minutes <= 1000 * 60 %>
     <span class="text-muted" style="position: absolute; left: 0%; font-size: 11px; transform: translateX(0);">0</span>
