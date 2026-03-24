@@ -31,6 +31,19 @@ touch app/views/shared/_progressbar.html.erb
 ```
 
 ```erb
+<%# app/views/shared/_progressbar.html.erb %>
+
+<% progress = [(@total_hours / 10000.0 * 100), 100].min.round(1) %>
+<div class="progress mb-1" style="height: 6px;">
+  <div class="progress-bar bg-dark" style="width: <%= progress %>%;"></div>
+</div>
+
+<div style="position: relative; height: 28px; margin-top: 6px;">
+  ・・・
+</div>
+```
+
+```erb
 <%# app/views/home/index.html.erb %>
       <%= render "shared/progressbar" %>
       <%= yield %>
@@ -41,6 +54,8 @@ touch app/views/shared/_progressbar.html.erb
 ## 3️⃣ プログレスバーをマイルストーンごとに条件分岐
 
 ```erb
+・・・
+
 <div style="position: relative; height: 28px; margin-top: 6px;">
   <% if current_user.total_learning_minutes <= 1000 * 60 %>
     <span class="text-muted" style="position: absolute; left: 0%; font-size: 11px; transform: translateX(0);">0</span>
@@ -65,3 +80,5 @@ touch app/views/shared/_progressbar.html.erb
 ```
 
 ---
+
+## 4️⃣ マイページにプログレスバーを実装
