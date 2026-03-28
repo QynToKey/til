@@ -203,7 +203,7 @@ class LearningTheme < ApplicationRecord
 end
 ```
 
-### `UserController` の `update` アクションを修正
+### `UserController` の `new` / `update` アクションを修正
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -225,4 +225,16 @@ end
   rescue ActiveRecord::RecordInvalid
     render :edit, status: :unprocessable_entity
   end
+```
+
+### マイページ `new` / `edit` ビューの更新
+
+```erb
+    <div class="mb-3">
+      <%= label_tag :learning_theme_name, "学習テーマ", class: "form-label" %>
+      <%= text_field_tag :learning_theme_name,
+          current_user.learning_themes.first&.name,
+          class: "form-control",
+      placeholder: "※ 学習テーマを入力してください（例：英語、ギター）" %>
+    </div>
 ```
