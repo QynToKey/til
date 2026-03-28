@@ -76,3 +76,15 @@ add_index :learning_themes, [:user_id, :name], unique: true, where: "name IS NOT
 - `where: "name IS NOT NULL"` → **NULLの行はこの制約の対象外にする**（部分インデックス）
 
 👉 *結果として「同じユーザーが同じ名前のテーマを2つ作れない、ただしname未設定はいくつあってもOK」という制約になる*
+
+  ⬇️
+
+```bash
+$ docker compose exec web rails db:migrate
+== 20260328045747 CreateLearningThemes: migrating =============================
+-- create_table(:learning_themes)
+   -> 0.0366s
+-- add_index(:learning_themes, [:user_id, :name], {:unique=>true, :where=>"name IS NOT NULL"})
+   -> 0.0154s
+== 20260328045747 CreateLearningThemes: migrated (0.0521s) ====================
+```
