@@ -171,3 +171,5 @@ $ docker compose exec web rails db:migrate
         <p class='small mt-3'>'<%= current_user.learning_themes.first&.name %>' の総学習時間</p>
       <% else %>
 ```
+
+### マイページ `new` / `edit`
