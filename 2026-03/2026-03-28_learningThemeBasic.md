@@ -104,7 +104,7 @@ $ docker compose exec web rails db:migrate
 
 ## 2️⃣ 既存データの移行
 
-### マイグレーションファイルを生成 / 修正 / 実行
+### マイグレーションファイルを生成
 
 ```bash
 $ docker compose exec web rails g migration MigrateLearningThemeToLearningThemes
@@ -112,7 +112,7 @@ $ docker compose exec web rails g migration MigrateLearningThemeToLearningThemes
       create    db/migrate/20260328060103_migrate_learning_theme_to_learning_themes.rb
 ```
 
-  ⬇️ 修正
+### `users.learning_theme` カラムを削除
 
 ```ruby
 # 2026-03/2026-03-28_learningThemeBasic.md
@@ -141,7 +141,7 @@ class MigrateLearningThemeToLearningThemes < ActiveRecord::Migration[8.1]
 end
 ```
 
-  ⬇️ 実行
+  ⬇️ `db:migrate`
 
 ```bash
 $ docker compose exec web rails db:migrate
@@ -153,10 +153,12 @@ $ docker compose exec web rails db:migrate
 
 ---
 
-### `LearningTheme` カラム削除に伴うビューの表示エラーに対応
+## 3️⃣ `LearningTheme` カラム削除に伴うビューの表示エラーに対応
 
 📝 `current_user.learning_theme` カラムがもう存在しないため、
   `users.learning_theme`（文字列）ではなく、`learning_themes` テーブルから取得するように変更する。
+
+### マイページ / TOP ページ
 
 ```ruby
 # app/views/users/show.html.erb
