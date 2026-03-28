@@ -18,7 +18,7 @@
 
 ```ruby
 # モデル側で制御
-validates :name, presence: true, if: -> { user.learning_themes.count >= 1 }
+validates :name, presence: true, if: -> { user.learning_themes.where.not(id: id).exists? }
 ```
 
 ---
@@ -203,7 +203,28 @@ class LearningTheme < ApplicationRecord
 end
 ```
 
-### `UserController` の `new` / `update` アクションを修正
+### `UserController` の `create` / `update` アクションを修正
+
+```ruby
+# app/controllers/users_controller.rb
+  def create
+    @user = User.new(user_params)
+
+    ActiveRecord::Base.transaction do
+      # このブロック内の処理は「全部成功」か「全部失敗」のどちらかになる
+      # @user.save! が失敗 → theme.save! は実行されず、@user の登録も取り消される
+      # learning_themes.create! が失敗 → @user の登録も取り消される
+      # → どちらかが失敗した場合、DBは transaction 実行前の状態に戻る（ロールバック）
+      @user.save!
+      @user.learning_themes.create!(name: params[:learning_theme_name].presence)
+    end
+
+    auto_login(@user)
+    redirect_to user_path(current_user), notice: "登録が完了しました"
+  rescue ActiveRecord::RecordInvalid
+    render :new, status: :unprocessable_entity
+  end
+```
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -230,6 +251,20 @@ end
 ### マイページ `new` / `edit` ビューの更新
 
 ```erb
+<%# app/views/users/new.html.erb %>
+    <div class="mb-3">
+      <%= label_tag :learning_theme_name, "学習テーマ", class: "form-label" %>
+      <%= text_field_tag :learning_theme_name,
+          nil,
+          class: "form-control",
+      placeholder: "※ 学習テーマを入力してください（例：英語、ギター）" %>
+    </div>
+```
+
+👉 *`new` は未ログインユーザーが使う画面なので `learning_themes` の初期値は空欄 (`nil`) に設定する*
+
+```erb
+<%# app/views/users/edit.html.erb %>
     <div class="mb-3">
       <%= label_tag :learning_theme_name, "学習テーマ", class: "form-label" %>
       <%= text_field_tag :learning_theme_name,
@@ -238,3 +273,5 @@ end
       placeholder: "※ 学習テーマを入力してください（例：英語、ギター）" %>
     </div>
 ```
+
+---
