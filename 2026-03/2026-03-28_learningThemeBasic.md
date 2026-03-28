@@ -164,10 +164,9 @@ $ docker compose exec web rails db:migrate
 
 ## 3️⃣ `LearningTheme` カラム削除に伴うビューの表示エラーに対応
 
-📝 `current_user.learning_theme` カラムがもう存在しないため、
-  `users.learning_theme`（文字列）ではなく、`learning_themes` テーブルから取得するように変更する。
-
 ### マイページ / TOP ページ
+
+👉 *`current_user.learning_theme` カラムがもう存在しないため、`users.learning_theme`（文字列）ではなく `learning_themes` テーブルから取得するように変更する*
 
 ```ruby
 # app/views/users/show.html.erb
@@ -182,3 +181,8 @@ $ docker compose exec web rails db:migrate
 ```
 
 ### マイページ `new` / `edit`
+
+| 機能 | 実装方針 |
+| --- | --- |
+| 1つ目のテーマを登録・編集する | ✅ 実装・公開する |
+| 2つ目以降のテーマを追加する導線 | 🔒 実装済み・公開保留 |
