@@ -1,4 +1,4 @@
-# [卒制](https://github.com/QynToKey/HowLongWillItLast) (MVP 後)：`LearningTheme` 再実装（基盤構築）
+# [卒制](https://github.com/QynToKey/HowLongWillItLast) (MVP 後)：`LearningTheme` 再実装（基盤構築 と 既存データの移行）
 
 ## 0️⃣ 実装方針の確認
 
@@ -102,4 +102,53 @@ $ docker compose exec web rails db:migrate
 
 ---
 
-## 2️⃣
+## 2️⃣ 既存データの移行
+
+### マイグレーションファイルを生成 / 修正 / 実行
+
+```bash
+$ docker compose exec web rails g migration MigrateLearningThemeToLearningThemes
+      invoke  active_record
+      create    db/migrate/20260328060103_migrate_learning_theme_to_learning_themes.rb
+```
+
+  ⬇️ 修正
+
+```ruby
+# 2026-03/2026-03-28_learningThemeBasic.md
+class MigrateLearningThemeToLearningThemes < ActiveRecord::Migration[8.1]
+  def up
+    # 全ユーザーに learning_themes レコードを１件作成
+    User.find_each do |user|
+      LearningTheme.create!(
+        user_id: user.id,
+        name: user.learning_theme #nil でもそのまま learning_themes.name へコピー
+      )
+    end
+
+    # users.learning_theme カラムを削除
+    remove_column :users, :learning_theme
+  end
+
+  # db:rollback が必要になったときは up メソッドを逆再生する
+  def down
+    add_column :users, :learning_theme, :string
+
+    LearningTheme.find_each do |theme|
+      User.find(theme.user_id).update!(learning_theme: theme.name)
+    end
+  end
+end
+```
+
+  ⬇️ 実行
+
+```bash
+$ docker compose exec web rails db:migrate
+== 20260328060103 MigrateLearningThemeToLearningThemes: migrating =============
+-- remove_column(:users, :learning_theme)
+   -> 0.0061s
+== 20260328060103 MigrateLearningThemeToLearningThemes: migrated (0.0925s) ====
+```
+
+---
