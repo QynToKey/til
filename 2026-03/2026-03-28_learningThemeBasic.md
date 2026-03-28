@@ -25,6 +25,8 @@ validates :name, presence: true, if: -> { user.learning_themes.count >= 1 }
 
 ## 1️⃣ `LearningTheme` モデルの生成
 
+### g コマンドでモデルを生成
+
 👉 *既存のマイグレーションファイルに上書き*
 
 ```bash
@@ -35,7 +37,7 @@ $ docker compose exec web rails g model LearningTheme user:references name:strin
       create    app/models/learning_theme.rb
 ```
 
-  ⬇️ 生成されたマイグレーションファイルを修正
+### 生成されたマイグレーションファイルを修正
 
 ```ruby
 # db/migrate/20260328045747_create_learning_themes.rb
@@ -77,7 +79,7 @@ add_index :learning_themes, [:user_id, :name], unique: true, where: "name IS NOT
 
 👉 *結果として「同じユーザーが同じ名前のテーマを2つ作れない、ただしname未設定はいくつあってもOK」という制約になる*
 
-  ⬇️
+### `db:migrate`
 
 ```bash
 $ docker compose exec web rails db:migrate
@@ -88,3 +90,16 @@ $ docker compose exec web rails db:migrate
    -> 0.0154s
 == 20260328045747 CreateLearningThemes: migrated (0.0521s) ====================
 ```
+
+### `User` との紐付け
+
+👉 *`LearningTheme` 側は `rails g model` で自動生成済みなので、`User` 側に設定を追加*
+
+```ruby
+# app/models/user.rb
+  has_many :learning_themes, dependent: :destroy
+```
+
+---
+
+## 2️⃣
