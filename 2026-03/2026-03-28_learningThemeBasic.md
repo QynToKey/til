@@ -151,6 +151,15 @@ $ docker compose exec web rails db:migrate
 == 20260328060103 MigrateLearningThemeToLearningThemes: migrated (0.0925s) ====
 ```
 
+### `UsersController` から `:learning_theme` を削除
+
+```ruby
+# app/controllers/users_controller.rb
+  def user_params
+    params.require(:user).permit(:name, :email, :password, :password_confirmation)
+  end
+```
+
 ---
 
 ## 3️⃣ `LearningTheme` カラム削除に伴うビューの表示エラーに対応
