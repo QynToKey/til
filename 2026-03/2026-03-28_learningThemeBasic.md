@@ -152,3 +152,20 @@ $ docker compose exec web rails db:migrate
 ```
 
 ---
+
+### `LearningTheme` カラム削除に伴うビューの表示エラーに対応
+
+📝 `current_user.learning_theme` カラムがもう存在しないため、
+  `users.learning_theme`（文字列）ではなく、`learning_themes` テーブルから取得するように変更する。
+
+```ruby
+# app/views/users/show.html.erb
+      学習テーマ： <%= current_user.learning_themes.first&.name %>
+```
+
+```ruby
+# app/views/home/index.html.erb
+      <% if current_user.learning_themes.first&.name.present? %>
+        <p class='small mt-3'>'<%= current_user.learning_themes.first&.name %>' の総学習時間</p>
+      <% else %>
+```
