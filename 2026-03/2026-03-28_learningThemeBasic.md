@@ -186,3 +186,15 @@ $ docker compose exec web rails db:migrate
 | --- | --- |
 | 1つ目のテーマを登録・編集する | ✅ 実装・公開する |
 | 2つ目以降のテーマを追加する導線 | 🔒 実装済み・公開保留 |
+
+#### `LearningTheme` モデルにバリデーションを追加
+
+```ruby
+# app/models/learning_theme.rb
+class LearningTheme < ApplicationRecord
+  belongs_to :user
+
+  # 自分自身を除いた他の learning_theme の存在を確認し、存在すれば２つ目以降の name を必須にする
+  validates :name, presence: true, if: -> { user.learning_themes.where.not(id: id).exists? }
+end
+```
