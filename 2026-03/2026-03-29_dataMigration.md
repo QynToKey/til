@@ -75,7 +75,7 @@ $ docker compose exec web rails db:migrate
 📝 `optional: true` ：
 これがないと、既存データの中に `learning_theme_id` が `nil` のレコードが将来発生した際に、`belongs_to` のバリデーションが働いてレコードが保存できなくなる。
 
-### `app/models/learning_theme.rb` に `has_many` を追加
+### `LearningTheme` モデルに `has_many` を追加
 
 ```ruby
 # app/models/learning_theme.rb
@@ -84,3 +84,5 @@ $ docker compose exec web rails db:migrate
 ```
 
 ---
+
+#### 総学習時間： 1155.5 時間
