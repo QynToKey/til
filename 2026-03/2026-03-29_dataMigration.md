@@ -60,3 +60,17 @@ $ docker compose exec web rails db:migrate
 ```
 
 ---
+
+## 2️⃣ モデルの関連付けを更新
+
+### `LearningRecord` / `Tag` モデルに `belongs_to :learning_theme` を追加
+
+```ruby
+# app/models/learning_record.rb
+# app/models/tag.rb
+  belongs_to :user
+  belongs_to :learning_theme, optional: true # nil 許容
+```
+
+📝 `optional: true` ：
+これがないと、既存データの中に `learning_theme_id` が `nil` のレコードが将来発生した際に、`belongs_to` のバリデーションが働いてレコードが保存できなくなる。
