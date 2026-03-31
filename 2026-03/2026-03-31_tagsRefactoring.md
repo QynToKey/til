@@ -153,3 +153,30 @@ end
 ```
 
 ---
+
+## 4️⃣ `learning_records_controller` にも `@learning_theme` を追加
+
+```ruby
+# app/controllers/learning_records_controller.rb
+class LearningRecordsController < ApplicationController
+  ・・・
+  before_action :set_learning_theme, only: %i[index create edit update] # ⬅️追加
+
+  ・・・
+
+  private
+  ・・・
+  def set_learning_theme # ⬅️追加
+    # current_user の learning_themes の中からのみ検索することで、他ユーザーの learning_theme にアクセスできないようにする
+    @learning_theme = current_user.learning_themes.first
+  end
+end
+```
+
+📝 `before_action :set_learning_theme` ：
+`index` / `create` / `edit` / `update` のビューで `@learning_theme` を使うリンクがあるため、これらのアクション実行前に `@learning_theme` をセット *（`new` を除外しているのは、未ログインユーザーによるアクセスを許容するため）*
+
+📝 `set_learning_theme` メソッド ：
+`tags_controller` の `set_learning_theme` と異なり、URLに `learning_theme_id` が含まれないので `params[:learning_theme_id]` は使えない。代わりに `.first` でユーザーの唯一のテーマを取得。
+
+---
