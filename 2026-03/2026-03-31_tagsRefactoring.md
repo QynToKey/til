@@ -40,3 +40,26 @@ app/views/users/show.html.erb:    <%= link_to 'タグ管理', tags_path, class: 
 | `tag_path(tag)` | `learning_theme_tag_path(@learning_theme, tag)` |
 
 ---
+
+## 1️⃣ `tags` のルーティングを `learning_themes` 内にネストする
+
+```ruby
+# config/routes.rb
+  resources :learning_themes do
+    resources :tags, only: %i[index new create edit update destroy]
+    resources :todos
+  end
+```
+
+  ⬇️ 確認
+
+```bash
+$ docker compose exec web rails routes | grep tag
+      learning_theme_tags GET    /learning_themes/:learning_theme_id/tags(.:format)                                                tags#index
+                          POST   /learning_themes/:learning_theme_id/tags(.:format)                                                tags#create
+  new_learning_theme_tag GET    /learning_themes/:learning_theme_id/tags/new(.:format)                                            tags#new
+  edit_learning_theme_tag GET    /learning_themes/:learning_theme_id/tags/:id/edit(.:format)                                       tags#edit
+      learning_theme_tag PATCH  /learning_themes/:learning_theme_id/tags/:id(.:format)                                            tags#update
+                          PUT    /learning_themes/:learning_theme_id/tags/:id(.:format)                                            tags#update
+                          DELETE /learning_themes/:learning_theme_id/tags/:id(.:format)                                            tags#destroy
+```
