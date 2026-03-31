@@ -249,19 +249,7 @@ end
 
 > 対応：
 
-- 未ログインユーザーには `_form` 内のタグ管理リンクを表示しない
-- `LearningRecordsController` の `set_learning_theme` メソッドを修正
-
-```erb
-<%# app/views/learning_records/_form.html.erb %>
-    <% if logged_in? %>
-      <%= f.submit class: "btn btn-sm btn-primary" %>
-      <%= link_to "学習ログ", learning_records_path, class: "btn btn-sm btn-outline-primary" %>
-      <% if current_user %>
-        <%= link_to "タグ管理", learning_theme_tags_path(@learning_theme), class: "btn btn-sm btn-outline-primary" %>
-      <% end %>
-    <% end %>
-```
+`LearningRecordsController` の `set_learning_theme` メソッドを修正
 
 ```ruby
 # app/controllers/learning_records_controller.rb
@@ -282,3 +270,5 @@ class LearningRecordsController < ApplicationController
 左辺が `nil` の場合はエラーにならず `nil` を返す。
 
 ---
+
+### 総学習時間： 1165.3 時間
