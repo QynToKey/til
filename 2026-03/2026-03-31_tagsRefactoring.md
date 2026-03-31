@@ -132,3 +132,24 @@ end
 ```
 
 ---
+
+## 3️⃣ `tags/` ディレクトリ内のファイルのリンクを修正
+
+```erb
+<%# app/views/tags/_form.html.erb %>
+<%= form_with model: [@learning_theme, @tag], class: "container mt-4" do |f| %>
+```
+
+```erb
+<%# app/views/tags/index.html.erb %>
+    <%= link_to '編集', edit_learning_theme_tag_path(@learning_theme, tag), class: "btn btn-sm btn-outline-secondary" %>
+    <%= link_to '削除', learning_theme_tag_path(@learning_theme, tag), class: "btn btn-sm btn-outline-danger", data: { turbo_method: :delete, turbo_confirm: '本当に削除しますか？' } %>
+```
+
+```erb
+<%# app/views/tags/new.html.erb %>
+<%# app/views/tags/edit.html.erb %>
+  <%= render 'form', tag: @tag, return_path: learning_theme_tags_path(@learning_theme) %>
+```
+
+---
