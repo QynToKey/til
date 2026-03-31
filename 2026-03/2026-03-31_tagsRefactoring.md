@@ -223,3 +223,19 @@ end
 ```
 
 ---
+
+## 7️⃣ `app/views/learning_records/` 内のファイルのリンクを修正
+
+```erb
+<%# app/views/learning_records/index.html.erb %>
+  <%= link_to 'タグ管理', learning_theme_tags_path(@learning_theme), class: "btn btn-sm btn-outline-primary" %>
+
+      <%= link_to 'タグを追加する', new_learning_theme_tag_path(@learning_theme), class: "btn btn-sm btn-outline-primary" %>
+```
+
+```erb
+<%# app/views/learning_records/_form.html.erb %>
+      <%= link_to "タグ管理", learning_theme_tags_path(@learning_theme), class: "btn btn-sm btn-outline-primary" %>
+```
+
+---
