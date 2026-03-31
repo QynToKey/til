@@ -180,3 +180,46 @@ end
 `tags_controller` の `set_learning_theme` と異なり、URLに `learning_theme_id` が含まれないので `params[:learning_theme_id]` は使えない。代わりに `.first` でユーザーの唯一のテーマを取得。
 
 ---
+
+## 5️⃣ `UsersController` に `@learning_theme` を追加
+
+※ 同上
+
+```ruby
+# app/controllers/users_controller.rb
+class UsersController < ApplicationController
+  ・・・
+  before_action :set_learning_theme, only: %i[show edit] # ⬅️追加
+
+  ・・・
+
+  private
+
+  ・・・
+
+  def set_learning_theme # ⬅️追加
+    # current_user の learning_themes の中からのみ検索することで、他ユーザーの learning_theme にアクセスできないようにする
+    @learning_theme = current_user.learning_themes.first
+  end
+end
+```
+
+---
+
+## 6️⃣ `users/` ディレクトリ内のビューのリンクを修正
+
+```erb
+<%# app/views/users/show.html.erb %>
+          <%= link_to 'タグを編集する', learning_theme_tags_path(@learning_theme), class: "btn btn-sm btn-outline-primary" %>
+
+          <%= link_to 'タグを追加する', learning_theme_tags_path(@learning_theme), class: "btn btn-sm btn-outline-primary" %>
+
+    <%= link_to 'タグ管理', learning_theme_tags_path(@learning_theme), class: "btn btn-sm btn-outline-primary" %>
+```
+
+```erb
+<%# app/views/users/edit.html.erb %>
+    <%= link_to "タグ管理", learning_theme_tags_path(@learning_theme), method: :get, class: "btn btn-sm btn-outline-primary" %>
+```
+
+---
