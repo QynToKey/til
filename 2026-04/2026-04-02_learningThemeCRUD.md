@@ -81,3 +81,36 @@ end
 ```
 
 ---
+
+## 2️⃣ コントローラーを作成
+
+👉 *今回はビューも作らず、中身もシンプルなので `touch` コマンドで作成する（`g` コマンドだと余計なファイルまで生成してしまうので、かえってオプション指定が複雑になってしまう）*
+
+```bash
+touch app/controllers/learning_themes_controller.rb
+
+# g コマンドを使う場合
+
+docker compose exec web rails generate controller learning_themes --no-helper --no-assets --no-view-specs --skip-template-engine
+```
+
+```ruby
+# app/controllers/learning_themes_controller.rb
+class LearningThemesController < ApplicationController
+  before_action :set_learning_theme, only: %i[destroy]
+
+  def destroy
+    @learning_theme.destroy
+    redirect_to user_path(current_user), notice: "学習テーマを削除しました"
+  end
+
+  private
+
+  def set_learning_theme
+    # current_user のテーマの中からのみ検索し、他ユーザーのテーマを操作できないようにする
+    @learning_theme = current_user.learning_themes.find(params[:id])
+  end
+end
+```
+
+---
