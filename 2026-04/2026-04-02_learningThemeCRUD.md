@@ -17,7 +17,7 @@
 
 ---
 
-## 1️⃣ `LearningTheme` に上限3件のバリデーションを追加
+## 1️⃣ `LearningThemesController`  に上限3件のバリデーションを追加
 
 > 上限を指定する理由：
 
