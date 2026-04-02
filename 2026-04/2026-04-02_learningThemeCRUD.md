@@ -44,3 +44,40 @@ class LearningTheme < ApplicationRecord
   end
 end
 ```
+
+📝 `validates` と `validate` :
+
+- `validates` → 属性名を渡すメソッド
+- `validate` → カスタムメソッド名を渡すメソッド
+
+  ⬇️ コンソールで確認
+
+```bash
+>> user.learning_themes.create(name: "テスト1")
+=>
+#<LearningTheme:0x0000ffffb4b277d0
+ id: 5,
+ user_id: 2,
+ name: "テスト1",
+ created_at: "2026-04-02 09:42:00.738102000 +0000",
+ updated_at: "2026-04-02 09:42:00.738102000 +0000">
+
+>> user.learning_themes.create(name: "テスト2")
+=>
+#<LearningTheme:0x0000ffffb2b13700
+ id: 6,
+ user_id: 2,
+ name: "テスト2",
+ created_at: "2026-04-02 09:42:09.959705000 +0000",
+ updated_at: "2026-04-02 09:42:09.959705000 +0000">
+
+>> result = user.learning_themes.create(name: "テスト3")
+  TRANSACTION (0.6ms)  ROLLBACK
+=>
+#<LearningTheme:0x0000ffffb41d2090
+
+>> result.errors.full_messages
+=> ["学習テーマは３件までしか登録できません"]
+```
+
+---
