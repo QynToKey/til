@@ -107,14 +107,16 @@ class UsersController < ApplicationController
         <h2 class="card-title h6 text-muted">
           学習テーマ： <%= theme.name.presence || '未設定' %>
         </h2>
-        <%= button_to "削除", learning_theme_path(theme), method: :delete, data: { turbo_confirm: "このテーマを削除すると、関連する記録 / タグ / TODO も全て削除されます。よろしいですか？" }, class: "btn btn-sm btn-outline-danger" %>
+
+        <%# テーマ削除は、複数テーマ公開時にコメントアウトを外す %>
+        <%# <%= button_to "このテーマを削除する", learning_theme_path(theme), method: :delete, data: { turbo_confirm: "このテーマを削除すると、関連する記録 / タグ / TODO も全て削除されます。よろしいですか？" }, class: "btn btn-sm btn-outline-danger" %>
 
         <p class='small mt-3'>総学習時間： <%= theme.total_learning_minutes_in_hours %> 時間</p>
 
         <%= render "shared/progressbar", theme: theme %>
 
         <% tag_summaries = @tag_summaries_by_theme[theme.id] %>
-        <% if @tag_summaries&.any? %>
+        <% if tag_summaries&.any? %>
           <ul class="small mt-2 ps^3">
             <% tag_summaries.each do |summary| %>
               <li><%= summary[:name] %>： <%= summary[:hours] %> 時間</li>
@@ -124,23 +126,33 @@ class UsersController < ApplicationController
 
         <%= link_to '今日の学習を記録する', new_learning_record_path(study_date: Date.current), class: "btn btn-sm btn-outline-primary" %>
         <%= link_to '学習ログ', learning_records_path, class: "btn btn-sm btn-outline-primary" %>
-      </div>
-    </div>
 
-    <div class="card mb-3">
-      <div class="card-body">
-        <h2 class="card-title h6 text-muted">タグ (<%= theme.name.presence || '未設定' %>)</h2>
-          <% if theme.tags.present? %>
-            <p class='small mt-3'>設定済み： <%= theme.tags.map(&:name).join(', ') %></p>
-            <%= link_to 'タグを編集する', learning_theme_tags_path(theme), class: "btn btn-sm btn-outline-primary" %>
-          <% else %>
-            <p class="text-muted small mt-3">※ 学習記録にタグを設定すると、タグごとに学習ログを管理できます</p>
-            <%= link_to 'タグを追加する', learning_theme_tags_path(theme), class: "btn btn-sm btn-outline-primary" %>
-          <% end %>
+    <hr class="my-3">
+
+    <h3 class="h6 text-muted">タグ</h3>
+      <% if theme.tags.present? %>
+        <p class='small mt-2'>設定済み： <%= theme.tags.map(&:name).join(', ') %></p>
+        <%= link_to 'タグを編集する', learning_theme_tags_path(theme), class: "btn btn-sm btn-outline-primary" %>
+      <% else %>
+        <p class="text-muted small mt-3">※ 学習記録にタグを設定すると、タグごとに学習ログを管理できます</p>
+        <%= link_to 'タグを追加する', learning_theme_tags_path(theme), class: "btn btn-sm btn-outline-primary" %>
+      <% end %>
+
+    <hr class="my-3">
+
+    <h3 class="h6 text-muted">TODO</h3>
+      <% if theme.todos.present? %>
+        <p class='small mt-2'><%= theme.todos.count %>件の TODO が登録されています。</p>
+        <%= link_to 'TODO 一覧へ', learning_theme_todos_path(theme), class: "btn btn-sm btn-outline-primary" %>
+      <% else %>
+        <p class="text-muted small mt-2">※ 学習計画や参照資料を TODO リストで管理できます</p>
+        <%= link_to 'TODO を追加する', learning_theme_todos_path(theme), class: "btn btn-sm btn-outline-primary" %>
+      <% end %>
       </div>
     </div>
   <% end %>
 </div>
+
 ```
 
 ### プログレスバー（パーシャル）
