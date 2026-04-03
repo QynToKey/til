@@ -1,8 +1,8 @@
 # [卒制](https://github.com/QynToKey/HowLongWillItLast) (MVP 後)： 複数の `LearningThemes` に対応
 
-## 1️⃣ `LearningTheme` モデルに `total_learning_minutes` / `next_threshold` メソッドを追加
+## 1️⃣ `LearningTheme` モデルに学習時間計算メソッドを追加
 
-👉 *`User` モデルに定義したものを転用する (`THRESHOLDS` は `User` モデルで定義されているので `User::THRESHOLDS` と書く)*
+👉 *`User` モデルに定義した `total_learning_minutes` / `next_threshold` を転用する (`THRESHOLDS` は `User` モデルで定義されているので `User::THRESHOLDS` と書く)*
 
 ```ruby
 # app/models/learning_theme.rb
@@ -64,7 +64,17 @@ class UsersController < ApplicationController
   end
 ```
 
-## 3️⃣
+---
+
+## 3️⃣ ビューの更新
+
+```erb
+<%# app/views/users/show.html.erb %>
+      <% @learning_themes.each do |theme| %>
+        <%= render "shared/progressbar", learning_theme: theme %>
+      <% end %>
+      <%= yield %>
+```
 
 ---
 
