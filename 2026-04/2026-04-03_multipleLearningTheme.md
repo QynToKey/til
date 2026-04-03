@@ -242,3 +242,7 @@ class UsersController < ApplicationController
   ⬇️ リファクタリング issue として積んでおく
 
 > [learning_records / tags / todos の user_id を learning_theme 経由に統一する#177](https://github.com/users/QynToKey/projects/5/views/1?pane=issue&itemId=172175287&issue=QynToKey%7CHowLongWillItLast%7C177)
+
+---
+
+### 総学習時間： 1175.6 時間
