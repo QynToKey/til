@@ -73,7 +73,7 @@ class UsersController < ApplicationController
 
 ## 3️⃣ ビューの更新
 
-### マイページ `users#show`
+### マイページ `users/show`
 
 👉 *タグ・Todoカードの `@learning_theme` 参照は、複数テーマ対応後は「どのテーマのタグ・Todoか」をテーマごとに表示する構造になる。*
 
@@ -211,6 +211,25 @@ class UsersController < ApplicationController
 <% else %>
   <p class="text-muted small mt-2">🎉 エキスパートレベル達成！</p>
 <% end %>
+```
+
+### `users/edit` テーマ追加フォームを追加（コメントアウトで保留）
+
+👉 *複数テーマを送信する際は `learning_theme_names[]` と配列形式にする必要がある。併せて `UsersController#update` の処理も変更も必要*
+
+```erb
+<%# app/views/users/edit.html.erb %>
+    <div class="mb-3">
+      <%= label_tag :learning_theme_name, "学習テーマ", class: "form-label" %>
+      <%= text_field_tag :learning_theme_name,
+          current_user.learning_themes.first&.name,
+          class: "form-control",
+      placeholder: "※ 学習テーマを入力してください（例：英語、Rails、ピアノ など）" %>
+
+      <%# テーマ追加フォーム：複数テーマ公開時にコメントアウトを外す %>
+      <%# <%= text_field_tag :learning_theme_name[], nil, class: "form-control mt-2", placeholder: "※ 学習テーマは３つまで登録できます" %>
+      <%# <%= text_field_tag :learning_theme_name[], nil, class: "form-control mt-2", placeholder: "※ 学習テーマは３つまで登録できます" %>
+    </div>
 ```
 
 ---
