@@ -15,7 +15,7 @@
   # 現在の総学習時間を超える最初の閾値を取得
   def next_threshold
     total_hours = total_learning_minutes / 60.0
-    user: :THRESHOLDS.find { |t| t[:hours] > total_hours }
+    User::THRESHOLDS.find { |t| t[:hours] > total_hours }
   end
 ```
 
