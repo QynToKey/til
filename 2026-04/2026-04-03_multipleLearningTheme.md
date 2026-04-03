@@ -19,6 +19,23 @@
   end
 ```
 
+  ⬇️ 動作確認
+
+```bash
+>> theme = User.first.learning_themes.first
+=>
+#<LearningTheme:0x0000ffff99928e18
+...
+>> theme.total_learning_minutes
+=> 60616
+>> theme.next_threshold
+=> {:hours=>2500, :label=>"中級"}
+```
+
+---
+
+## 2️⃣
+
 ---
 
 ## 補足
