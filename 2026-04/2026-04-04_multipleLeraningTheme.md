@@ -166,7 +166,16 @@ end
         <%= link_to '学習ログ', learning_records_path(theme_id: theme.id), class: "btn btn-sm btn-outline-primary" %>
 ```
 
-#### TOP ページ `app/views/learning_records/index.html.erb`
+#### 学習ログ `app/views/learning_records/index.html.erb`
+
+```erb
+  <div>
+    <%# テーマごとの総学習時間を表示 %>
+    <p class='small mt-3'>総学習時間： <%= (@learning_theme.total_learning_minutes / 60.0).round(1) %> 時間</p>
+  </div>
+```
+
+#### TOP `app/views/home/index.html.erb`
 
 ```erb
 ```
