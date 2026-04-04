@@ -5,7 +5,8 @@
 1. `users/edit` のフォームを配列形式に変更
 2. `UsersController#update` を複数テーマ対応に変更
 3. マイページ `users/show` の導線を複数テーマ対応に修正
-4. `learning_records/index` のタグフィルタリングをテーマ別に対応
+4. TOP ページを複数テーマ対応に修正
+5. `learning_records/index` のタグフィルタリングをテーマ別に対応
 
 ---
 
@@ -112,7 +113,7 @@ current_user.learning_themes[theme_names.size..].each { |theme| theme.destroy! }
 
 ## 4️⃣ TOP ページを複数テーマ対応に修正
 
-### `HomeController`
+### Home コントローラー `app/controllers/home_controller.rb`
 
 ```ruby
 class HomeController < ApplicationController
@@ -126,3 +127,23 @@ class HomeController < ApplicationController
   end
 end
 ```
+
+### TOP ページ `app/views/home/index.html.erb`
+
+```erb
+  <% if logged_in? %>
+    <div class="mt-5 mb-4">
+      <% @learning_themes.each do |theme| %>
+        <p class='small mt-3 mb-1'>
+          '<%= theme.name.presence || '未設定' %>' の総学習時間
+        </p>
+        <p class="h3 mb-2"><%= theme.total_learning_minutes_in_hours %> 時間</p>
+        <%= render "shared/progressbar", theme: theme %>
+        <hr class="my-3">
+      <% end %>
+    </div>
+```
+
+---
+
+## 5️⃣ `learning_records/index` のタグフィルタリングをテーマ別に対応
