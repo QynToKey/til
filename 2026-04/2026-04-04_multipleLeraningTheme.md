@@ -150,13 +150,13 @@ end
 
 ## 5️⃣ `learning_records/index` のタグフィルタリングをテーマ別に対応
 
-### 実装方針
+> 実装方針
 
 - 「学習ログ」 `learning_records/index` は、テーマごとに別々のページを遷移する仕様にする
 - `theme_id` と紐づけることで、テーマごとに別々の「学習ログ」を表示させる
 - タグ / TODO は `theme_id` に紐づいているため現状のまま
 
-#### マイページ `app/views/users/show.html.erb`
+### マイページ `app/views/users/show.html.erb`
 
 ```erb
   <% @learning_themes.each do |theme| %>
@@ -166,21 +166,43 @@ end
         <%= link_to '学習ログ', learning_records_path(theme_id: theme.id), class: "btn btn-sm btn-outline-primary" %>
 ```
 
-#### 学習ログ `app/views/learning_records/index.html.erb`
+### 学習ログ `app/views/learning_records/index.html.erb`
 
 ```erb
   <div>
     <%# テーマごとの総学習時間を表示 %>
-    <p class='small mt-3'>総学習時間： <%= (@learning_theme.total_learning_minutes / 60.0).round(1) %> 時間</p>
+    <p class='small mt-3'>総学習時間（<%= @learning_theme.name %>）： <%= (@learning_theme.total_learning_minutes / 60.0).round(1) %> 時間</p>
   </div>
 ```
 
-#### TOP `app/views/home/index.html.erb`
+### TOP `app/views/home/index.html.erb`
 
 ```erb
+  <% if logged_in? %>
+    <div class="mt-5 mb-4">
+      <% @learning_themes.each do |theme| %>
+        <p class='small mt-3 mb-1'>
+          '<%= theme.name.presence || '未設定' %>' の総学習時間
+        </p>
+        <p class="h3 mb-2"><%= theme.total_learning_minutes_in_hours %> 時間</p>
+        <%= render "shared/progressbar", theme: theme %>
+        <div class="d-flex gap-2 mt-1 mb-3">
+          <%= link_to '今日の学習を記録する', new_learning_record_path(study_date: Date.current, theme_id: theme.id), class: "btn btn-sm btn-outline-primary" %>
+          <%= link_to '学習ログ', learning_records_path(theme_id: theme.id), class: "btn btn-sm btn-outline-secondary" %>
+        </div>
+        <hr class="my-3">
+      <% end %>
+    </div>
 ```
 
-#### コントローラー `LearningRecordsController`
+📝 その他、関連する全てのビューの「今日の記録」「学習ログ」ボタンのリンクに `theme_id` を紐付け
+
+- `learning_records/index.html.erb`
+- `tags/index.html.erb`
+- `users/edit.html.erb`
+- `users/show.html.erb`
+
+### コントローラー `LearningRecordsController`
 
 ```ruby
 # app/controllers/learning_records_controller.rb
