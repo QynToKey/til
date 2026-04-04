@@ -4,7 +4,7 @@
 
 1. `users/edit` のフォームを配列形式に変更
 2. `UsersController#update` を複数テーマ対応に変更
-3. `users/show` の削除ボタンのコメントアウトを外す
+3. マイページ `users/show` の導線を複数テーマ対応に修正
 4. `learning_records/index` のタグフィルタリングをテーマ別に対応
 
 ---
@@ -77,4 +77,52 @@ current_user.learning_themes[theme_names.size..].each { |theme| theme.destroy! }
 
 ---
 
-## 3️⃣ `users/show` の削除ボタンのコメントアウトを外す
+## 3️⃣ マイページ `users/show` の導線を複数テーマ対応に修正
+
+```erb
+<div class="container mt-5" style="max-width: 600px;">
+  <h1 class="h5 mb-4">マイページ : '<%= current_user.name %>' さん</h1>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="card-title h6 text-muted">プロフィール</h2>
+      ・・・
+      </p>
+      <p class="mb-3 small ps-3">
+        <% if current_user.learning_themes.present? %>
+          学習テーマ： <%= current_user.learning_themes.count %>件登録されています (編集する場合は<%= link_to 'こちら', edit_user_path(current_user) %>)
+        <% else %>
+          学習テーマが登録されていません。
+          (登録する場合は<%= link_to 'こちら', edit_user_path(current_user) %>)
+        <% end %>
+      </p>
+    <%= link_to 'プロフィールを編集する', edit_user_path(current_user), class: "btn btn-sm btn-outline-primary" %>
+    </div>
+  </div>
+
+  ・・・
+
+      <div class="card-footer">
+        <%= button_to "このテーマを削除する", learning_theme_path(theme), method: :delete, data: { turbo_confirm: "このテーマを削除すると、関連する記録 / タグ / TODO も全て削除されます。よろしいですか？" }, class: "btn btn-sm btn-outline-danger" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+```
+
+## 4️⃣ TOP ページを複数テーマ対応に修正
+
+### `HomeController`
+
+```ruby
+class HomeController < ApplicationController
+  skip_before_action :require_login, only: [ :index ]
+
+  def index
+    # トップページでは、ログインユーザーの学習テーマとその学習時間を表示するためにデータを準備する
+    if logged_in?
+      @learning_themes = current_user.learning_themes
+    end
+  end
+end
+```
