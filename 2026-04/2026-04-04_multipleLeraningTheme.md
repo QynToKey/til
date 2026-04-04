@@ -101,7 +101,7 @@ current_user.learning_themes[theme_names.size..].each { |theme| theme.destroy! }
     </div>
   </div>
 
-  ・・・
+      ・・・
 
       <div class="card-footer">
         <%= button_to "このテーマを削除する", learning_theme_path(theme), method: :delete, data: { turbo_confirm: "このテーマを削除すると、関連する記録 / タグ / TODO も全て削除されます。よろしいですか？" }, class: "btn btn-sm btn-outline-danger" %>
@@ -110,6 +110,8 @@ current_user.learning_themes[theme_names.size..].each { |theme| theme.destroy! }
   <% end %>
 </div>
 ```
+
+---
 
 ## 4️⃣ TOP ページを複数テーマ対応に修正
 
@@ -147,3 +149,50 @@ end
 ---
 
 ## 5️⃣ `learning_records/index` のタグフィルタリングをテーマ別に対応
+
+### 実装方針
+
+- 「学習ログ」 `learning_records/index` は、テーマごとに別々のページを遷移する仕様にする
+- `theme_id` と紐づけることで、テーマごとに別々の「学習ログ」を表示させる
+- タグ / TODO は `theme_id` に紐づいているため現状のまま
+
+#### マイページ `app/views/users/show.html.erb`
+
+```erb
+  <% @learning_themes.each do |theme| %>
+    <div class="card mb-3">
+      <div class="card-body">
+       ・・・
+        <%= link_to '学習ログ', learning_records_path(theme_id: theme.id), class: "btn btn-sm btn-outline-primary" %>
+```
+
+#### TOP ページ `app/views/learning_records/index.html.erb`
+
+```erb
+```
+
+#### コントローラー `LearningRecordsController`
+
+```ruby
+# app/controllers/learning_records_controller.rb
+  def index
+    # ユーザーが所有する学習記録をタグ情報とともに取得し、学習日が新しい順に並べる
+    @learning_records = if params[:theme_id].present?
+                          # テーマIDが指定されている場合は、そのテーマに該当する学習記録のみを表示する
+                          current_user.learning_records.where(learning_theme_id: @learning_theme.id).includes(:tags).order(study_date: :desc)
+                        else
+                          # テーマIDが指定されていない場合は、すべての学習記録を表示する
+                          current_user.learning_records.includes(:tags).order(study_date: :desc)
+                        end
+    ・・・
+  end
+
+  def set_learning_theme
+    # テーマIDが指定されている場合は、そのテーマをセットする。指定されていない場合は、ユーザーの最初のテーマをセットする。
+    @learning_theme = if params[:theme_id].present?
+                        current_user.learning_themes.find(params[:theme_id])
+                      else
+                        current_user&.learning_themes&.first
+                      end
+  end
+```
