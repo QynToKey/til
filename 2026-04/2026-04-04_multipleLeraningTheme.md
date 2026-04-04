@@ -34,4 +34,47 @@
 
 ```ruby
 # app/controllers/users_controller.rb
+  def update
+    @user.assign_attributes(user_params) # 属性を更新するが保存しない
+
+    theme_names = params[:learning_theme_names].reject(&:blank?) # 空の入力を除外してテーマ名を更新
+
+    ActiveRecord::Base.transaction do
+      # このブロック内の処理は「全部成功」か「全部失敗」のどちらかになる
+      # @user.save! が失敗 → theme.save! は実行されず、@user の変更も取り消される
+      # theme.save! が失敗 → @user の変更も取り消される
+      # → どちらかが失敗した場合、DBは transaction 実行前の状態に戻る（ロールバック）
+      @user.save!
+
+      # 既存テーマを更新 / 新規テーマを追加
+      theme_names.each_with_index do |name, i|
+        theme = current_user.learning_themes[i] || current_user.learning_themes.build
+        theme.name = name
+        theme.save!
+      end
+
+      # 送信されたテーマ数より多い既存テーマは削除する
+      if current_user.learning_themes.size > theme_names.size
+        current_user.learning_themes[theme_names.size..].each(&:destroy!)
+      end
+    end
+
+    redirect_to user_path(current_user), notice: "ユーザー情報を更新しました"
+  rescue ActiveRecord::RecordInvalid
+    render :edit, status: :unprocessable_entity
+  end
 ```
+
+📝 `(&:destroy!)` ：
+`&:` はシンボルをブロックに変換する記法で、
+`&:メソッド名` で「各要素に対してそのメソッドを呼ぶ」という意味。
+
+```ruby
+# この2つは同じ意味
+current_user.learning_themes[theme_names.size..].each(&:destroy!)
+current_user.learning_themes[theme_names.size..].each { |theme| theme.destroy! }
+```
+
+---
+
+## 3️⃣ `users/show` の削除ボタンのコメントアウトを外す
