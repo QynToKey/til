@@ -215,7 +215,15 @@ end
                           # テーマIDが指定されていない場合は、すべての学習記録を表示する
                           current_user.learning_records.includes(:tags).order(study_date: :desc)
                         end
-    ・・・
+      if params[:tag_id].present?
+      # ユーザーが所有するタグの中から、指定されたタグIDに該当するタグを見つける
+      @current_tag = current_user.tags.find(params[:tag_id])
+      # タグIDが指定されている場合は、そのタグが付いている学習記録のみを表示する
+      @learning_records = @learning_records.joins(:tags).where(tags: { id: @current_tag.id })
+    elsif params[:date].present?
+      # 学習日が指定されている場合は、その日に該当する学習記録のみを表示する
+      @learning_records = @learning_records.where(study_date: params[:date])
+    end
   end
 
   def set_learning_theme
@@ -227,3 +235,5 @@ end
                       end
   end
 ```
+
+---
