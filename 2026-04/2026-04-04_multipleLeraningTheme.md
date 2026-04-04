@@ -242,3 +242,26 @@ end
 ```
 
 ---
+
+## 6️⃣ ２つ目以降の「学習テーマ」が正常に記録されないバグに対応
+
+- destroy` アクション に `set_learning_theme` を追加し `theme_id` を引き継ぐ
+- `learning_records` の各ビューに `theme_id` を引き継ぐリンクを追加
+
+```ruby
+class LearningRecordsController < ApplicationController
+  skip_before_action :require_login, only: %i[new]
+  before_action :set_learning_record, only: %i[show edit update destroy]
+  before_action :set_learning_theme, only: %i[index new create edit update destroy] # ⬅️ destroy を追加
+
+  ・・・
+
+  def destroy
+    @learning_record.destroy
+    redirect_to learning_records_path(theme_id: @learning_theme.id), notice: "学習記録を削除しました"
+  end
+```
+
+---
+
+### 総学習時間： 1181.3 時間
