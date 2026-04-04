@@ -1,4 +1,4 @@
-# [卒制](https://github.com/QynToKey/HowLongWillItLast) (MVP 後)： 複数の `LearningThemes` に対応
+# [卒制](https://github.com/QynToKey/HowLongWillItLast) (MVP 後)： 複数の `LearningThemes` に対応 (1/2)
 
 ## 1️⃣ `LearningTheme` モデルに学習時間計算メソッドを追加
 
