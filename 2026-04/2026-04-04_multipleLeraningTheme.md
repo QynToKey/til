@@ -202,6 +202,11 @@ end
 - `users/edit.html.erb`
 - `users/show.html.erb`
 
+📝 その他、関連する全てのビューでタグの参照先に `@learning_theme` を指定
+
+- `app/views/learning_records/_form.html.erb`
+- `app/views/learning_records/index.html.erb`
+
 ### コントローラー `LearningRecordsController`
 
 ```ruby
