@@ -355,4 +355,24 @@ heme_id"
 
 ---
 
+## 6️⃣ `user_id` 削除に伴うバグに対応
+
+> 原因：
+
+カラムを削除したのに関連定義が残っているため、`current_user.learning_records` を呼ぶと `user_id` を使ったクエリが発行されてエラーになる。
+
+> 対応：
+
+`user.rb` の `has_many` を `through: :learning_themes` に変更。
+
+```ruby
+# app/models/user.rb
+  has_many :learning_themes, dependent: :destroy
+  has_many :learning_records, through: :learning_themes
+  has_many :tags, through: :learning_themes
+  has_many :todos, through: :learning_themes
+```
+
+---
+
 ### 総学習時間： 1185.2 時間
