@@ -329,7 +329,7 @@ heme_id"
   4ファイルに belongs_to :user が残っています。
 ```
 
-  ⬇️
+  ⬇️ 対応
 
 | ファイル | 対応 |
 | --- | --- |
@@ -337,6 +337,19 @@ heme_id"
 | `app/models/tag.rb` | 削除 |
 | `app/models/todo.rb` | 削除 |
 | `app/models/learning_theme.rb` | **残す** |
+
+  ⬇️ 確認
+
+```bash
+>> LearningRecord.first.user
+  LearningRecord Load (4.0ms)  SELECT "learning_records".* FROM learning_theme_id: 1> (NoMethodError)
+>> LearningRecord.first.learning_theme.user
+=>
+#<User:0x0000ffff7c750928
+```
+
+- [x] `LearningRecord.first.user` → `NoMethodError`（`belongs_to :user` を削除したので正しい）
+- [x] `LearningRecord.first.learning_theme.user` → `User` オブジェクトが返ってきた
 
 ---
 
