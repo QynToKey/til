@@ -306,4 +306,38 @@ heme_id"
 
 ---
 
-## 5️⃣
+## 5️⃣ `LearningRecord` / `tag` / `todo` モデルから `belongs_to :user` を削除
+
+```bash
+❯ `belongs_to :user`
+が残っているファイルと行数をリストアップしてください。
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ ┌───────────────────────────────┬──────┐
+  │           ファイル            │ 行数 │
+  ├───────────────────────────────┼──────┤
+  │ app/models/tag.rb             │ 2    │
+  ├───────────────────────────────┼──────┤
+  │ app/models/learning_record.rb │ 2    │
+  ├───────────────────────────────┼──────┤
+  │ app/models/todo.rb            │ 2    │
+  ├───────────────────────────────┼──────┤
+  │ app/models/learning_theme.rb  │ 2    │
+  └───────────────────────────────┴──────┘
+
+  4ファイルに belongs_to :user が残っています。
+```
+
+  ⬇️
+
+| ファイル | 対応 |
+| --- | --- |
+| `app/models/learning_record.rb` | 削除 |
+| `app/models/tag.rb` | 削除 |
+| `app/models/todo.rb` | 削除 |
+| `app/models/learning_theme.rb` | **残す** |
+
+---
+
+## 6️⃣
