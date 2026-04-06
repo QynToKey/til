@@ -42,7 +42,7 @@ $ cat ~/.claude/settings.json
 | ③ | 自分でコードを書く | 書いたコードのレビュー依頼 |
 | ④ | マイグレーション作成 | 構文の確認のみ |
 
-### Clode Code を起動
+### Claude Code を起動
 
 ```bash
 claude
@@ -338,6 +338,8 @@ heme_id"
 | `app/models/todo.rb` | 削除 |
 | `app/models/learning_theme.rb` | **残す** |
 
+※ ドキュメント類（`README` / `docs/er_diagram.md`）についても同様に対応。
+
   ⬇️ 確認
 
 ```bash
@@ -353,4 +355,4 @@ heme_id"
 
 ---
 
-## 6️⃣
+### 総学習時間： 1185.2 時間
