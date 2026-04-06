@@ -42,6 +42,193 @@ $ cat ~/.claude/settings.json
 | ③ | 自分でコードを書く | 書いたコードのレビュー依頼 |
 | ④ | マイグレーション作成 | 構文の確認のみ |
 
+### Clode Code を起動
+
+```bash
+claude
+```
+
 ---
 
-## 1️⃣
+## 1️⃣ 影響範囲の把握
+
+```bash
+
+> user_idを参照しているファイルと行番号をリストアップして。ファイルの修正は一切しないこと。
+
+ ---
+  user_id を参照しているファイルと行番号
+
+  db/schema.rb
+
+  ┌─────┬────────────────────────────────────────────────────┐
+  │ 行  │                        内容                        │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 24  │ t.bigint "user_id", null: false (learning_records) │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 26  │ t.index ["user_id"], ... (learning_records)        │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 33  │ t.bigint "user_id", null: false (learning_themes)  │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 34  │ t.index ["user_id", "name"], ... (learning_themes) │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 35  │ t.index ["user_id"], ... (learning_themes)         │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 53  │ t.bigint "user_id", null: false (tags)             │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 56  │ t.index ["user_id"], ... (tags)                    │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 76  │ t.bigint "user_id", null: false (todos)            │
+  ├─────┼────────────────────────────────────────────────────┤
+  │ 78  │ t.index ["user_id"], ... (todos)                   │
+  └─────┴────────────────────────────────────────────────────┘
+
+  db/migrate/
+
+  ファイル: 20260307024210_create_tags.rb
+  行: 10
+  内容: add_index :tags, [ :user_id, :name ], unique: true
+  ────────────────────────────────────────
+  ファイル: 20260328045747_create_learning_themes.rb
+  行: 10
+  内容: add_index :learning_themes, [ :user_id, :name ], unique:
+    true, ...
+  ────────────────────────────────────────
+  ファイル:
+  20260328060103_migrate_learning_theme_to_learning_themes.rb
+  行: 6
+  内容: user_id: user.id,
+  ────────────────────────────────────────
+  ファイル:
+  20260328060103_migrate_learning_theme_to_learning_themes.rb
+  行: 20
+  内容: User.find(theme.user_id).update!(...)
+  ────────────────────────────────────────
+  ファイル: 20260329072729_add_learning_theme_id_to_learning_records
+  _and_tags.rb
+  行: 8
+  内容: LearningTheme.find_by(user_id: record.user_id)
+  ────────────────────────────────────────
+  ファイル: 20260329072729_add_learning_theme_id_to_learning_records
+  _and_tags.rb
+  行: 17
+  内容: LearningTheme.find_by(user_id: tag.user_id)
+  ────────────────────────────────────────
+  ファイル:
+  20260403152308_fix_learning_records_missing_learning_theme_id.rb
+  行: 4
+  内容: LearningTheme.find_by(user_id: record.user_id)
+  ────────────────────────────────────────
+  ファイル: 20260404084417_change_unique_index_on_tags.rb
+  行: 3
+  内容: remove_index :tags, [ :user_id, :name ]
+
+  config/initializers/sorcery.rb
+  ・・・
+
+  test/channels/application_cable/connection_test.rb
+  ・・・
+
+  README.md
+
+  ┌─────┬───────────────────────────────────────────────────────┐
+  │ 行  │                         内容                          │
+  ├─────┼───────────────────────────────────────────────────────┤
+  │ 142 │ user_id: bigint / usersテーブルの外部キー（NOT NULL） │
+  ├─────┼───────────────────────────────────────────────────────┤
+  │ 149 │ user_id: bigint / usersテーブルの外部キー             │
+  ├─────┼───────────────────────────────────────────────────────┤
+  │ 158 │ user_id: bigint / usersテーブルの外部キー             │
+  ├─────┼───────────────────────────────────────────────────────┤
+  │ 166 │ user_id: bigint / usersテーブルの外部キー             │
+  └─────┴───────────────────────────────────────────────────────┘
+
+  docs/er_diagram.md
+
+  ┌─────┬──────────────────────────────────────┐
+  │ 行  │                 内容                 │
+  ├─────┼──────────────────────────────────────┤
+  │ 77  │ learning_records.user_id は NOT NULL │
+  ├─────┼──────────────────────────────────────┤
+  │ 131 │ bigint user_id FK "NOT NULL"         │
+  ├─────┼──────────────────────────────────────┤
+  │ 139 │ bigint user_id FK                    │
+  ├─────┼──────────────────────────────────────┤
+  │ 150 │ bigint user_id FK                    │
+  ├─────┼──────────────────────────────────────┤
+  │ 159 │ bigint user_id FK "NOT NULL"         │
+  └─────┴──────────────────────────────────────┘
+
+  ---
+  app/ 配下には user_id の参照はありませんでした（モデルの
+  belongs_to :user から自動解決されているためです）。
+  ```
+
+---
+
+## 2️⃣ 修正方針
+
+- `sorcery.rb` と `test.rb` はコメント行なので無視
+- ドキュメント類(`README` / `docs/er_diagram.md`)はリファクタリング後に手書きで修正
+- `db/schema.rb` に対してマイグレーションを実行（自動で修正）
+
+---
+
+## 3️⃣ マイグレーションファイルを作成
+
+```bash
+$ docker compose exec web rails g migration RemoveUserIdFromLearningRecordsTagsTodos
+      invoke  active_record
+      create    db/migrate/20260406053128_remove_user_id_from_learning_records_tags_todos.rb
+```
+
+  ⬇️
+
+```ruby
+# db/migrate/20260406053128_remove_user_id_from_learning_records_tags_todos.rb
+
+class RemoveUserIdFromLearningRecordsTagsTodos < ActiveRecord::Migration[8.1]
+  def change
+    remove_index :learning_records, :user_id # ⬅️ index を先に削除する
+    remove_index :tags, :user_id
+    remove_index :todos, :user_id
+
+    remove_column :learning_records, :user_id
+    remove_column :tags, :user_id
+    remove_column :todos, :user_id
+  end
+end
+```
+
+📝 なぜインデックスを先に削除するのか：
+インデックスは「カラムを参照して」作られるため、
+カラムを先に消すと、インデックスが参照先を失うのでエラーになる。
+
+```markdown
+カラム : `user_id`
+  └── インデックス `index_tags_on_user_id`  ← `user_id` を参照している
+```
+
+※ 依存関係のある順序で削除する、という考え方は外部キーの削除でも同じ
+
+---
+
+## 4️⃣ マイグレーションを実行
+
+```bash
+$ docker compose exec web rails db:migrate
+== 20260406053128 RemoveUserIdFromLearningRecordsTagsTodos: migrating =========
+-- remove_index(:learning_records, :user_id)
+   -> 0.0300s
+-- remove_index(:tags, :user_id)
+   -> 0.0038s
+-- remove_index(:todos, :user_id)
+   -> 0.0034s
+-- remove_column(:learning_records, :user_id)
+   -> 0.0074s
+-- remove_column(:tags, :user_id)
+   -> 0.0022s
+-- remove_column(:todos, :user_id)
+   -> 0.0020s
+== 20260406053128 RemoveUserIdFromLearningRecordsTagsTodos: migrated (0.0492s)
+```
