@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 1）
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 1） :開発環境の構築
 
 ## やったこと
 
