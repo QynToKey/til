@@ -1,8 +1,10 @@
-# Docker 前提の Rails プロジェクト立ち上げ
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 1）
 
 ## やったこと
 
 Rails 8.x + PostgreSQL + Docker Compose の構成で、新規 Rails プロジェクト（co-READER）を立ち上げた。合わせて GitHub リポジトリの作成・push、GitHub CLI のセットアップ、issue 設計までを行った。
+
+※ このプロジェクトは Claude Code を使用して行う。
 
 ---
 
@@ -10,7 +12,7 @@ Rails 8.x + PostgreSQL + Docker Compose の構成で、新規 Rails プロジェ
 
 ### 1. プロジェクトディレクトリと Docker ファイルを用意する
 
-```
+```md
 Gemfile          # gem "rails", "~> 8.0" のみ記載
 Gemfile.lock     # 空ファイル（bundle install の前に必要）
 Dockerfile
@@ -62,18 +64,18 @@ docker compose up
 
 ### `psych` gem のビルドエラー
 
-```
+```bash
 yaml.h not found
 ```
 
-**原因**：`libyaml-dev` が Dockerfile に含まれていなかった。  
+**原因**：`libyaml-dev` が Dockerfile に含まれていなかった。
 **対処**：apt-get のインストールリストに `libyaml-dev` を追加。
 
 ### Rails アプリが生成されていなかった
 
 `docker compose up` で `rails new` のヘルプテキストが表示されてコンテナが終了した。
 
-**原因**：イメージビルドが失敗していた状態で `docker compose up` を実行したため、`rails new .`（Step 1）が実行されておらず、アプリのファイルが存在しなかった。  
+**原因**：イメージビルドが失敗していた状態で `docker compose up` を実行したため、`rails new .`（Step 1）が実行されておらず、アプリのファイルが存在しなかった。
 **対処**：Dockerfile を修正後、`docker compose build --no-cache` でリビルドし、改めて `rails new .` を実行。
 
 ---
@@ -97,7 +99,7 @@ gh auth status  # ログイン確認
 MVP 機能を以下の Epic に分類し、SP（ストーリーポイント）を付けて GitHub issue を作成した。
 
 | Epic | 内容 |
-|---|---|
+| --- | --- |
 | 基盤整備 | Render デプロイ、CI |
 | 認証 | Sorcery、ロール管理、招待URL |
 | テキスト管理 | テキストのCRUD・表示 |
