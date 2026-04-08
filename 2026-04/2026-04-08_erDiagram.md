@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 2）： ER図
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 2_1）： ER図
 
 ## 概要
 
