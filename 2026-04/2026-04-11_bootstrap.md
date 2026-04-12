@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 5_1）： Bootstrap を導入
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 5）： Bootstrap を導入
 
 ## 1️⃣ Bootstrap の導入
 
