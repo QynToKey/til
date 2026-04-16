@@ -263,17 +263,115 @@ mkdir -p app/views/admin/invitations/ && touch app/views/admin/invitations/index
           <td><%= inv.created_at.strftime("%Y/%m/%d %H:%M") %></td>
           <td>
             <% if inv.available? %>
-              <span class="badge text-bg-success"><%=
-t("admin.invitations.index.status_available") %></span>
+              <span class="badge text-bg-success"><%= t("admin.invitations.index.status_available") %></span>
             <% else %>
-              <span class="badge text-bg-secondary"><%=
-t("admin.invitations.index.status_used") %></span>
+              <span class="badge text-bg-secondary"><%= t("admin.invitations.index.status_used") %></span>
             <% end %>
           </td>
         </tr>
       <% end %>
     </tbody>
   </table>
+</div>
+```
+
+---
+
+## 6️⃣ `Admin::Members` コントローラーを作成
+
+```bash
+touch app/controllers/admin/members_controller.rb
+```
+
+```ruby
+# app/controllers/admin/members_controller.rb
+class Admin::MembersController < ApplicationController
+  # Admin::MembersControllerは、管理者がメンバーを管理するための機能を提供します。
+  before_action :require_admin
+
+  def index
+    @users = User.where(role: :member).order(created_at: :desc)
+  end
+
+  def new
+    @user = User.new
+  end
+
+  def create
+    # user_paramsにrole: :memberをマージして、新しいユーザーを作成します。これにより、管理者がメンバーを登録する際に、常にroleがmemberになるようになります。
+    @user = User.new(user_params.merge(role: :member))
+    if @user.save
+      redirect_to admin_members_path, notice: "メンバーを登録しました"
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  # Strong Parametersを使用して、ユーザーの登録に必要なパラメータを許可するメソッド
+  def user_params
+    params.require(:user).permit(:email, :password, :password_confirmation)
+  end
+end
+```
+
+---
+
+## 7️⃣ `member/index` / `member/new` 画面を作成
+
+- `member/index`
+
+```bash
+mkdir -p app/views/admin/members/ && touch app/views/admin/members/index.html.erb
+```
+
+```erb
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4"><%= t("admin.members.index.title") %></h1>
+    <%= link_to "メンバーを直接登録", new_admin_member_path, class: "btn btn-primary" %>
+  </div>
+</div>
+```
+
+ 👉 *現状は空の一覧*
+
+- `member/new`
+
+```bash
+touch  app/views/admin/members/new.html.erb
+```
+
+```erb
+<div class="container mt-5" style="max-width: 600px;">
+  <h1 class="h4 mb-3"><%= t("admin.members.new.title") %></h1>
+
+  <%= form_with model: @user, url: admin_members_path do |f| %>
+    <% if @user.errors.any? %>
+      <div class="alert alert-danger">
+        <ul>
+          <% @user.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="mb-3">
+      <%= f.label :email, class: "form-label" %>
+      <%= f.email_field :email, class: "form-control" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :password, t("admin.members.new.password_hint"), class: "form-label" %>
+      <%= f.password_field :password, class: "form-control" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :password_confirmation, class: "form-label" %>
+      <%= f.password_field :password_confirmation, class: "form-control" %>
+    </div>
+    <%= f.submit t("admin.members.new.submit"), class: "btn btn-primary" %>
+  <% end %>
 </div>
 ```
 
