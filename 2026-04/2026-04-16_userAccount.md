@@ -22,7 +22,7 @@
 
 ---
 
-## 1️⃣ `CreateInvitations` テーブルを作成
+## 1️⃣ `Invitations` テーブルを作成
 
 ```bash
 $ docker compose exec web bin/rails g migration CreateInvitations
@@ -194,7 +194,7 @@ end
 
 ## 5️⃣ 「招待URL管理」ビューを作成
 
-> i18n を追加
+> i18n に `invitations` / `members` / `invite_registrations` を追加
 
 ```ruby
 # config/locales/views/ja.yml
@@ -332,10 +332,25 @@ mkdir -p app/views/admin/members/ && touch app/views/admin/members/index.html.er
     <h1 class="h4"><%= t("admin.members.index.title") %></h1>
     <%= link_to "メンバーを直接登録", new_admin_member_path, class: "btn btn-primary" %>
   </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>メールアドレス</th>
+        <th>登録日時</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @users.each do |user| %>
+        <tr>
+          <td><%= user.email %></td>
+          <td><%= user.created_at.strftime("%Y/%m/%d %H:%M") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 </div>
 ```
-
- 👉 *現状は空の一覧*
 
 - `member/new`
 
