@@ -377,6 +377,101 @@ touch  app/views/admin/members/new.html.erb
 
 ---
 
+## 8️⃣ `InviteRegistrations` コントローラーを作成
+
+```bash
+touch app/controllers/invite_registrations_controller.rb
+```
+
+```ruby
+# app/controllers/invite_registrations_controller.rb
+class InviteRegistrationsController < ApplicationController
+  # InviteRegistrationsControllerは、招待URLを使用してユーザーが登録するための機能を提供します。
+  skip_before_action :require_login
+
+  def new
+    @token_record = find_available_token
+    unless @token_record
+      redirect_to new_session_path, alert: "無効または使用済みのトークンです"
+      return
+    end
+    @user = User.new
+  end
+
+  def create
+    @token_record = find_available_token
+    unless @token_record
+      redirect_to new_session_path, alert: "無効または使用済みのトークンです"
+      return
+    end
+
+    @user = User.new(user_params.merge(role: :member))
+    if @user.save
+      @token_record.use!
+      auto_login(@user)
+      redirect_to root_path, notice: "登録が完了しました"
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  # 招待トークンが有効であればそのレコードを返し、無効であればnilを返すメソッド
+  def find_available_token
+    record = Invitation.find_by(token: params[:token])
+    record&.available? ? record : nil
+  end
+
+  # Strong Parametersを使用して、ユーザーの登録に必要なパラメータを許可するメソッド
+  def user_params
+    params.require(:user).permit(:email, :password, :password_confirmation)
+  end
+end
+```
+
+---
+
+## 9️⃣ 「メンバー登録」画面を作成
+
+```bash
+mkdir -p app/views/invite_registrations/ && touch app/views/invite_registrations/new.html.erb
+```
+
+``erb
+<div class="container mt-5" style="max-width: 600px;">
+  <h1 class="h4 mb-3"><%= t("invite_registrations.new.title") %></h1>
+
+  <%= form_with model: @user, url: invite_registration_path(token: params[:token]) do |f| %>
+    <% if @user.errors.any? %>
+      <div class="alert alert-danger">
+        <ul>
+          <% @user.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="mb-3">
+      <%= f.label :email, class: "form-label" %>
+      <%= f.email_field :email, class: "form-control" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :password, t("invite_registrations.new.password_hint"), class: "form-label" %>
+      <%= f.password_field :password, class: "form-control" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :password_confirmation, class: "form-label" %>
+      <%= f.password_field :password_confirmation, class: "form-control" %>
+    </div>
+    <%= f.submit t("invite_registrations.new.submit"), class: "btn btn-primary" %>
+  <% end %>
+</div>
+```
+
+---
+
 ## 検証手順
 
 > 方式A（招待URL）
