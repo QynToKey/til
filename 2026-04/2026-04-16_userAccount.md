@@ -98,7 +98,76 @@ end
 
 ---
 
-## 3️⃣
+## 3️⃣ ルーティングを追加
+
+```ruby
+# config/routes.rb
+Rails.application.routes.draw do
+  get "up" => "rails/health#show", as: :rails_health_check
+
+  root "sessions#new"
+
+  resource  :session,  only: %i[ new create destroy ],
+                        path_names: { new: "login" }
+  resources :users,    only: %i[ new create ],
+                        path_names: { new: "register" }
+
+  namespace :admin do
+    get  "register", to: "registrations#new",    as: :register
+    post "register", to: "registrations#create"
+    resources :invitations, only: %i[ index create ]
+    resources :members, only: %i[ index new create ]
+  end
+
+  get "invite/register", to: "invite_registrations#new", as: :new_invite_registration
+  post "invite/register", to: "invite_registrations#create", as: :invite_registration
+end
+```
+
+📝 Rubyのシンボル配列リテラル `%i[]` と `%w[]`
+
+- `%w[]` : 文字列の配列（word）
+
+```ruby
+  %w[foo bar baz]  # => ["foo", "bar", "baz"]
+```
+
+- `%i[]` : シンボルの配列（integer/identifier）
+
+```ruby
+  %i[foo bar baz]  # => [:foo, :bar, :baz]
+```
+
+  👉 *区切り文字はスペース（カンマ不可）*
+
+```ruby
+  %i[new, create]  # => [:"new,", :create]  ← "new," がそのままシンボル化される
+  %i[new create]   # => [:new, :create]      ← 正しい
+```
+
+  👉 *`[ ]` を使った通常の配列リテラルはカンマ区切り*
+
+```ruby
+  only: [:new, :create, :destroy]   # 通常の書き方（カンマ区切り）
+  only: %i[new create destroy]      # %i を使った書き方（スペース区切り）
+```
+
+ ⬇️ 生成されたルーティング
+
+```bash
+$ docker compose exec web bin/rails routes | grep -E  "invite|invitation|member"
+        admin_invitations GET    /admin/invitations(.:format)                                                                      admin/invitations#index
+                          POST   /admin/invitations(.:format)                                                                      admin/invitations#create
+            admin_members GET    /admin/members(.:format)                                                                          admin/members#index
+                          POST   /admin/members(.:format)                                                                          admin/members#create
+        new_admin_member GET    /admin/members/new(.:format)                                                                      admin/members#new
+  new_invite_registration GET    /invite/register(.:format)                                                                        invite_registrations#new
+      invite_registration POST   /invite/register(.:format)                                                                        invite_registrations#create
+```
+
+---
+
+## 4️⃣
 
 ---
 
