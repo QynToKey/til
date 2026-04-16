@@ -98,7 +98,7 @@ end
 
 ---
 
-## 3️⃣ ルーティングを追加
+## 3️⃣ 招待URL / メンバー登録 のルーティングを追加
 
 ```ruby
 # config/routes.rb
@@ -167,7 +167,115 @@ $ docker compose exec web bin/rails routes | grep -E  "invite|invitation|member"
 
 ---
 
-## 4️⃣
+## 4️⃣ `Admin::Invitations` コントローラーを作成
+
+```bash
+touch app/controllers/admin/invitations_controller.rb
+```
+
+```ruby
+# app/controllers/admin/invitations_controller.rb
+class Admin::InvitationsController < ApplicationController
+  # Admin::InvitationsControllerは、管理者がユーザーを招待するための招待URLを発行する機能を提供します。
+  before_action :require_admin
+
+  def index
+    @invitations = Invitation.order(created_at: :desc)
+  end
+
+  def create
+    Invitation.create!
+    redirect_to admin_invitations_path, notice: "招待URLを発行しました"
+  end
+end
+```
+
+---
+
+## 5️⃣ 「招待URL管理」ビューを作成
+
+> i18n を追加
+
+```ruby
+# config/locales/views/ja.yml
+ja:
+  ・・・
+  admin:
+    registrations:
+      ・・・
+    invitations:
+      index:
+        title: "招待URL管理"
+        new_button: "招待URLを発行"
+        table_url: "招待URL"
+        table_issued_at: "発行日時"
+        table_status: "状態"
+        status_available: "未使用"
+        status_used: "使用済み"
+    members:
+      index:
+        title: "メンバー一覧"
+      new:
+        title: "メンバー登録"
+        password_hint: "パスワード（8文字以上）"
+        submit: "登録する"
+  invite_registrations:
+    new:
+      title: "参加者登録"
+      password_hint: "パスワード（8文字以上）"
+      submit: "登録する"
+```
+
+> 「招待URL管理」画面
+
+```bash
+mkdir -p app/views/admin/invitations/ && touch app/views/admin/invitations/index.html.erb
+```
+
+```erb
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4"><%= t("admin.invitations.index.title") %></h1>
+    <%= button_to t("admin.invitations.index.new_button"),
+                  admin_invitations_path,
+                  method: :post,
+                  class: "btn btn-primary" %>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th><%= t("admin.invitations.index.table_url") %></th>
+        <th><%= t("admin.invitations.index.table_issued_at") %></th>
+        <th><%= t("admin.invitations.index.table_status") %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @invitations.each do |inv| %>
+        <tr>
+          <td>
+            <% if inv.available? %>
+              <%= new_invite_registration_url(token: inv.token) %>
+            <% else %>
+              <span class="text-muted">—</span>
+            <% end %>
+          </td>
+          <td><%= inv.created_at.strftime("%Y/%m/%d %H:%M") %></td>
+          <td>
+            <% if inv.available? %>
+              <span class="badge text-bg-success"><%=
+t("admin.invitations.index.status_available") %></span>
+            <% else %>
+              <span class="badge text-bg-secondary"><%=
+t("admin.invitations.index.status_used") %></span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+```
 
 ---
 
