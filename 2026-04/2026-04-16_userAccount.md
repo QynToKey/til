@@ -221,7 +221,7 @@ ja:
         submit: "登録する"
   invite_registrations:
     new:
-      title: "参加者登録"
+      title: "メンバー登録"
       password_hint: "パスワード（8文字以上）"
       submit: "登録する"
 ```
@@ -438,7 +438,7 @@ end
 mkdir -p app/views/invite_registrations/ && touch app/views/invite_registrations/new.html.erb
 ```
 
-``erb
+```erb
 <div class="container mt-5" style="max-width: 600px;">
   <h1 class="h4 mb-3"><%= t("invite_registrations.new.title") %></h1>
 
