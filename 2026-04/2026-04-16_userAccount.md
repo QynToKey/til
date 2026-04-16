@@ -487,7 +487,7 @@ mkdir -p app/views/invite_registrations/ && touch app/views/invite_registrations
 
 ---
 
-## 検証手順
+### 検証手順
 
 > 方式A（招待URL）
 
@@ -503,3 +503,7 @@ mkdir -p app/views/invite_registrations/ && touch app/views/invite_registrations
 - [ ] 管理者でログイン → /admin/members/new にアクセス
 - [ ] メール＋パスワードを入力 → 登録
 - [ ] シークレットウィンドウでそのメール＋パスワードでログイン → member ロールで入れることを確認
+
+---
+
+#### 総学習時間： 1213.5 時間
