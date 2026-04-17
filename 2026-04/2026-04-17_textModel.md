@@ -166,7 +166,7 @@ end
 
 ## 6️⃣ Stimulus コントローラーを作成
 
-👉 *`Javascript で、テキストの入力方法を切り替える*
+👉 *`Javascript で、テキストの入力方法を切り替えるコントローラーを実装*
 
 ```bash
 touch app/javascript/controllers/text_input_controller.js
@@ -222,3 +222,55 @@ toggle() {
 - ラジオボタンに書いた `data: { action: "change->text-input#toggle" }` が「値が変わったら `toggle()` を呼ぶ」という紐付け。
 
 ---
+
+## 7️⃣ i18n に `texts` 関連のワードを追加
+
+```ruby
+$ cat config/locales/views/ja.yml
+ja:
+  ・・・
+  layouts:
+    application:
+      ・・・
+      texts: "テキスト管理"
+  ・・・
+  admin:
+    ・・・
+    texts:
+      index:
+        title: "テキスト管理"
+        new_button: "テキストを登録"
+        table_title: "タイトル"
+        table_uploaded_by: "登録者"
+        table_created_at: "登録日時"
+        show: "詳細"
+        edit: "編集"
+        destroy: "削除"
+        confirm_destroy: "本当に削除しますか？"
+      show:
+        edit: "編集"
+        uploaded_by: "登録者"
+        back: "一覧に戻る"
+      new:
+        title: "テキスト登録"
+      edit:
+        title: "テキスト編集"
+      form:
+        input_mode: "入力方式"
+        mode_direct: "直接入力"
+        mode_file: "ファイルアップロード"
+        file_label: "テキストファイル（.txt）"
+        file_hint: "UTF-8 形式のファイルを選択してください"
+        submit: "保存する"
+        cancel: "キャンセル"
+      create:
+        success: "テキストを登録しました"
+      update:
+        success: "テキストを更新しました"
+      destroy:
+        success: "テキストを削除しました"
+```
+
+---
+
+## 8️⃣
