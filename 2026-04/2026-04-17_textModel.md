@@ -163,3 +163,62 @@ end
 👉 *ファイルアップロード UI：ラジオボタンで「ファイル」「直接入力」を切り替える。*
 
 ---
+
+## 6️⃣ Stimulus コントローラーを作成
+
+👉 *`Javascript で、テキストの入力方法を切り替える*
+
+```bash
+touch app/javascript/controllers/text_input_controller.js
+```
+
+```js
+// app/javascript/controllers/text_input_controller.js
+import { Controller } from "@hotwired/stimulus"
+
+// ユーザーは、直接テキストを入力するか、ファイルからテキストをアップロードするかを選択できます。
+export default class extends Controller {
+  static targets = ["directArea", "fileArea", "radio"]
+
+  toggle() {
+    const mode = this.radioTargets.find(r => r.checked).value
+    this.directAreaTarget.classList.toggle("d-none", mode !== "direct")
+    this.fileAreaTarget.classList.toggle("d-none", mode !== "file")
+  }
+}
+```
+
+> 📝 **Stimulus** について ：
+
+「HTML に書いた属性でJavaScriptの動作を紐付ける」ための軽量フレームワーク。
+*（複雑なDOM操作を書かずに済む）*
+
+> コントローラーの登録
+
+- `_form.html.erb` の `form_with` に書いた `data: { controller: "text-input" }` が起点となる。
+- この属性があるHTML要素に、`text_input_controller.js` が自動的に紐付く。 *（ファイル名のアンダースコアがハイフンに変換される）*
+
+> `targets` — 操作対象の要素を名前で参照
+
+```js
+static targets = ["directArea", "fileArea", "radio"]
+```
+
+- `data-text-input-target="directArea"` という属性を持つ要素を `this.directAreaTarget` で取得する。 *（`document.querySelector(...)` を自分で書く代わり）*
+
+ > `toggle()` — ラジオボタンが変わったときの処理
+
+```js
+toggle() {
+  const mode = this.radioTargets.find(r => r.checked).value
+  this.directAreaTarget.classList.toggle("d-none", mode !== "direct")
+  this.fileAreaTarget.classList.toggle("d-none", mode !== "file")
+}
+```
+
+1. チェックされているラジオボタンの `value`（`"direct"` or `"file"`）を取得
+2. Bootstrap の `d-none` クラスを付け外しして表示切替
+
+- ラジオボタンに書いた `data: { action: "change->text-input#toggle" }` が「値が変わったら `toggle()` を呼ぶ」という紐付け。
+
+---
