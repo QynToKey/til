@@ -9,3 +9,54 @@
 ---
 
 ## 1️⃣ `text` テーブルを作成
+
+```bash
+$ docker compose exec web bin/rails g migration CreateTexts
+      invoke  active_record
+      create    db/migrate/20260417060240_create_texts.rb
+```
+
+```ruby
+# db/migrate/20260417060240_create_texts.rb
+class CreateTexts < ActiveRecord::Migration[8.1]
+  def change
+    create_table :texts do |t|
+      t.bigint :uploaded_by, null: false
+      t.string :title, null: false
+      t.text :body, null: false
+      t.timestamps
+    end
+    # 外部キー制約を追加するために、uploaded_byカラムにインデックスを作成し、usersテーブルのidカラムと関連付ける
+    add_index :texts, :uploaded_by
+    add_foreign_key :texts, :users, column: :uploaded_by
+  end
+end
+```
+
+```bash
+$ docker compose exec web bin/rails db:migrate
+== 20260417060240 CreateTexts: migrating ======================================
+-- create_table(:texts)
+   -> 0.0481s
+-- add_index(:texts, :uploaded_by)
+   -> 0.0047s
+-- add_foreign_key(:texts, :users, {:column=>:uploaded_by})
+   -> 0.0100s
+== 20260417060240 CreateTexts: migrated (0.0631s) =============================
+```
+
+---
+
+## 2️⃣ `Text` モデルを作成
+
+```ruby
+class Text < ApplicationRecord
+  belongs_to :uploader, class_name: "User", foreign_key: :uploaded_by
+  validates :title, presence: true
+  validates :body, presence: true
+end
+```
+
+---
+
+## 3️⃣
