@@ -146,6 +146,8 @@ class Admin::TextsController < ApplicationController
 end
 ```
 
+👉 *`create` / `update` でファイルアップロード処理： `params[:file]` があれば `params[:file].read` を `body` に使用、なければ `text_params[:body]` を使用*
+
 ---
 
 ## 5️⃣ ビューの作成
