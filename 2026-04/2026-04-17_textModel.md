@@ -151,3 +151,15 @@ end
 ---
 
 ## 5️⃣ ビューの作成
+
+| ファイル | 内容 |
+| --- | --- |
+| `app/views/admin/texts/index.html.erb` | タイトル・登録者・登録日・操作リンク（詳細/編集/削除）のテーブル |
+| `app/views/admin/texts/show.html.erb` | タイトル・本文・登録者・日時の表示 |
+| `app/views/admin/texts/new.html.erb` | フォームパーシャルを呼ぶだけ |
+| `app/views/admin/texts/edit.html.erb` | フォームパーシャルを呼ぶだけ |
+| `app/views/admin/texts/_form.html.erb` | タイトル入力、入力方式の選択 UI（※）、エラー表示 |
+
+👉 *ファイルアップロード UI：ラジオボタンで「ファイル」「直接入力」を切り替える。*
+
+---
