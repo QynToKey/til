@@ -59,4 +59,19 @@ end
 
 ---
 
-## 3️⃣
+## 3️⃣ `texts` をルーティングに追加
+
+```ruby
+# config/routes.rb
+  namespace :admin do
+    get  "register", to: "registrations#new",    as: :register
+    post "register", to: "registrations#create"
+    resources :invitations, only: %i[ index create ]
+    resources :members, only: %i[ index new create ]
+    resources :texts, only: %i[ index show new create edit update destroy ] # ⬅️ 追加
+  end
+```
+
+---
+
+## 4️⃣
