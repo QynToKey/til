@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 10）： Text モデル
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 10）： Text モデル / 管理者 CRUD
 
 ## 0️⃣ 実装内容
 
@@ -273,4 +273,23 @@ ja:
 
 ---
 
-## 8️⃣
+## 8️⃣ ヘッダーにリンクを追加
+
+```erb
+      <% if current_user&.admin? %>
+        <%= link_to t("layouts.application.invitations"), admin_invitations_path, class: "nav-link" %>
+        <%= link_to t("layouts.application.members"), admin_members_path, class: "nav-link" %>
+        <%= link_to t("layouts.application.texts"), admin_texts_path, class: "nav-link" %>  <%# ← 追加 %>
+      <% end %>
+```
+
+---
+
+### 動作確認
+
+- [ ] `docker compose exec web bin/rails db:migrate` でテーブル作成確認
+- [ ] ブラウザで `/admin/texts` にアクセス → 一覧表示
+- [ ] 新規作成：直接入力 → テキスト登録確認
+- [ ] 新規作成：ファイルアップロード（.txt） → 本文に内容が入ることを確認
+- [ ] 編集・削除の動作確認
+- [ ] 管理者以外でアクセス → root へリダイレクト確認
