@@ -263,3 +263,7 @@ erDiagram
     ANNOTATIONS ||--o{ REPLIES : has
     USERS ||--o{ REPLIES : writes
 ```
+
+---
+
+### 総学習時間： 1225.0 時間
