@@ -21,6 +21,8 @@ $ docker compose exec web bin/rails g migration RefactorReadingSessionTexts
       create    db/migrate/20260420035501_refactor_reading_session_texts.rb
 ```
 
+  ⬇️
+
 ```ruby
 # db/migrate/20260420035501_refactor_reading_session_texts.rb
 class RefactorReadingSessionTexts < ActiveRecord::Migration[8.1]
@@ -67,6 +69,21 @@ class RefactorReadingSessionTexts < ActiveRecord::Migration[8.1]
 end
 ```
 
+  ⬇️
+
+```bash
+$ docker compose exec web bin/rails db:migrate
+== 20260420035501 RefactorReadingSessionTexts: migrating ======================
+-- create_table(:reading_session_texts)
+   -> 0.0432s
+-- add_index(:reading_session_texts, [:reading_session_id, :text_id], {:unique=>true})
+   -> 0.0031s
+-- execute("      INSERT INTO reading_session_texts (reading_session_id, text_id, created_at, updated_at)\n      SELECT id, text_id, NOW(), NOW() FROM reading_sessions\n      WHERE text_id IS NOT NULL\n")
+   -> 0.0068s
+-- remove_reference(:reading_sessions, :text, {:foreign_key=>true})
+   -> 0.0204s
+== 20260420035501 RefactorReadingSessionTexts: migrated (0.0739s) =============
+
 ---
 
 ## 2️⃣ 中間テーブル `reading_session_texts` を作成
@@ -86,7 +103,7 @@ end
 
 ---
 
-## 3️⃣ `ReadingSession` モデルを複数テキスト対応に修正
+## 3️⃣ `ReadingSession` / `Text` モデルを複数テキスト対応に修正
 
 ```ruby
 # app/models/reading_session.rb
@@ -104,10 +121,6 @@ end
    validates :creator, presence: true
 ```
 
----
-
-## 4️⃣ `Text` モデルを複数テキスト対応に修正
-
 ```ruby
 # app/models/text.rb
 
@@ -122,7 +135,7 @@ end
 
 ---
 
-## 5️⃣ `ReadingSessions` コントローラーのパスを修正
+## 4️⃣ `ReadingSessions` コントローラーのパスを修正
 
 ```ruby
 # app/controllers/reading_sessions_controller.rb
@@ -149,7 +162,7 @@ end
 
 ---
 
-## 6️⃣ 「セッション一覧」ページのリンクを修正
+## 5️⃣ 「セッション一覧」ページのリンクを修正
 
 👉 *#83（テキスト一覧ページ）実装までの一時的な退避措置*
 
