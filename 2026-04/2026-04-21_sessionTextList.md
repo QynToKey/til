@@ -13,4 +13,65 @@
 
 ---
 
-## 1️⃣
+## 1️⃣ ルーティングに `reading_sessions#show` を追加
+
+```ruby
+-  resources :reading_sessions, only: %i[ index ] do
++  resources :reading_sessions, only: %i[ index show ] do
+     get :join, on: :collection
+   end
+```
+
+---
+
+## 2️⃣ `ReadingSessionsController` に `show` アクションを追加
+
+```ruby
+# app/controllers/reading_sessions_controller.rb
+   def index
+     @memberships = current_user.memberships.includes(reading_session: :texts).order(created_at: :desc)
+   end
+
++  def show
++    @reading_session = ReadingSession.find(params[:id])
++    unless @reading_session.users.include?(current_user)
++      redirect_to reading_sessions_path, alert: "参加していないセッションです"
++      return
++    end
++    @texts = @reading_session.texts
++  end
++
+   def join
+```
+
+---
+
+## 3️⃣ 「セッション詳細」画面を作成
+
+```bash
+touch app/views/reading_sessions/show.html.erb
+```
+
+```erb
+<div class="container mt-5" style="max-width: 800px;">
+  <h1 class="h4 mb-4"><%= @reading_session.name.presence || "（名称なし）" %></h1>
+
+  <% if @texts.empty? %>
+    <p class="text-muted">テキストがありません。</p>
+  <% else %>
+    <ul class="list-group">
+      <% @texts.each do |text| %>
+        <li class="list-group-item">
+          <%= link_to text.title, text_path(text) %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <%= link_to "セッション一覧に戻る", reading_sessions_path, class: "btn btn-outline-secondary mt-3" %>
+</div>
+```
+
+---
+
+## 4️⃣
