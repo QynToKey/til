@@ -74,4 +74,103 @@ touch app/views/reading_sessions/show.html.erb
 
 ---
 
-## 4️⃣
+## 4️⃣ `index.html.erb` のセッション名をリンク化
+
+```erb
+-            <%= membership.reading_session.name %>
++            <%= link_to membership.reading_session.name.presence || "（名称なし）", reading_session_path(membership.reading_session) %>
+```
+
+---
+
+## 5️⃣ ヘッダーに管理者向け仮リンクを追加
+
+```erb
+<%# app/views/shared/_header.html.erb %>
+         <%= link_to t("layouts.application.texts"), admin_texts_path, class: "nav-link" %>
++        <%= link_to t("layouts.application.reading_sessions"), admin_reading_sessions_path, class: "nav-link" %>
+       <% end %>
+```
+
+---
+
+### 動作確認
+
+- [x] セッション一覧でセッション名がリンクになっていること
+- [x] リンクをクリックするとテキスト一覧が表示されること
+- [x] 参加していないセッションの URL に直アクセスするとセッション一覧にリダイレクトされること
+- [x] 管理者ログイン時にヘッダーに「セッション管理」リンクが表示されること
+
+---
+
+## 6️⃣ 「セッション管理」画面のリファクタリング
+
+現状「招待トークン」の URL が表示されているが、これは不要なので、「招待トークン発行」ボタンに変更する。
+
+### Stimulus に `clipboard` コントローラーを実装
+
+```ruby
+# app/javascript/controllers/clipboard_controller.js
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["button"]
+  static values = { content: String }
+
+  copy() {
+    navigator.clipboard.writeText(this.contentValue)
+      .then(() => {
+        const original = this.buttonTarget.textContent
+        this.buttonTarget.textContent = "コピーしました！"
+        setTimeout(() => { this.buttonTarget.textContent = original }, 2000)
+      })
+      .catch((err) => {
+        console.error("コピー失敗:", err)
+      })
+  }
+}
+```
+
+### `app/views/admin/reading_sessions/index.html.erb` を修正
+
+```erb
+-          <td>
+-            <%= link_to t("admin.reading_sessions.index.invite_url_button"),
+-                        join_reading_sessions_path(token: session.invite_token),
+-                        class: "btn btn-sm btn-outline-secondary",
+-                        target: "_blank", rel: "noopener noreferrer" %>
+-          </td>
++          <td>
++            <div data-controller="clipboard"
++                 data-clipboard-content-value="<%= join_reading_sessions_url(token: session.invite_token) %>">
++              <button data-clipboard-target="button"
++                      data-action="clipboard#copy"
++                      class="btn btn-sm btn-outline-secondary">
++                <%= t("admin.reading_sessions.index.invite_url_button") %>
++              </button>
++            </div>
++          </td>
+```
+
+### i18n に追記
+
+```ruby
+-        invite_url_button: "招待URLを開く"
++        copy_url_button: "招待URLをコピー"
+```
+
+---
+
+## 7️⃣ 「セッション作成」画面のリファクタリング
+
+ステータスに応じてボタンの表示を「作成する / 更新する」と切り替える。
+
+```erb
+<%# app/views/admin/reading_sessions/_form.html.erb %>
+- <%= f.submit t("admin.reading_sessions.form.submit"), class: "btn btn-primary" %>
++ <%= f.submit @reading_session.persisted? ? t("admin.reading_sessions.form.update") : t("admin.reading_sessions.form.submit"), class: "btn btn-primary" %>
+```
+
+---
+
+### 総学習時間： 1230.6 時間
