@@ -13,4 +13,41 @@
 
 ---
 
-## 1️⃣
+## 1️⃣ ルーティングに `reading_sessions` を追加
+
+```ruby
+# config/routes.rb
+   namespace :admin do
+     get  "register", to: "registrations#new",    as: :register
+     post "register", to: "registrations#create"
+     resources :invitations, only: %i[ index create ]
+     resources :members, only: %i[ index new create ]
+     resources :texts, only: %i[ index show new create edit update destroy ]
++    resources :reading_sessions, only: %i[ index new create ]
+   end
+```
+
+---
+
+## 2️⃣ `ReadingSession` モデルにバリデーションを追加
+
+```ruby
+# app/models/reading_session.rb
+   validates :invite_token, presence: true, uniqueness: true
+   validates :creator, presence: true
++
++  validate :at_least_one_text
+
+   # セッション作成後に、作成者をセッション管理者として memberships テーブルに自動的に追加するコールバック
+   after_create :assign_creator_as_admin
++
++  private
++
++  def at_least_one_text
++    errors.add(:texts, "を1件以上選択してください") if text_ids.blank?
++  end
+```
+
+---
+
+## 3️⃣
