@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 14）： セッション作成フロー
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 14_1）： セッション作成フロー
 
 ## 0️⃣ 現状と実装方針
 
