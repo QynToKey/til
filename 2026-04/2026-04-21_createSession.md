@@ -252,3 +252,28 @@ mkdir app/views/admin/reading_sessions/ && touch app/views/admin/reading_session
   <%= link_to t("admin.reading_sessions.form.cancel"), admin_reading_sessions_path, class: "btn btn-outline-secondary ms-2" %>
 <% end %>
 ```
+
+---
+
+## 6️⃣ `InviteRegistrationsController#create` のパスを修正
+
+```ruby
+# app/controllers/invite_registrations_controller.rb
+-      redirect_to root_path, notice: "登録が完了しました"
++      redirect_to reading_sessions_path, notice: "登録が完了しました。参加できるセッションをご確認ください。"
+```
+
+---
+
+### 動作確認
+
+- [x] 管理者でログインし `/admin/reading_sessions/new` にアクセスできること
+- [x] テキストを選択せずに送信 → バリデーションエラーが表示されること
+- [x] テキストを選択して送信 → 一覧にリダイレクトされ、セッションが表示されること
+- [x] 編集ボタンから名前・テキストを変更できること
+- [x] 削除ボタンで確認ダイアログが出て、削除できること
+- [x] 新規ユーザーが招待 URL から登録後、セッション一覧にリダイレクトされること
+
+---
+
+#### 総学習時間： 1228.5 時間
