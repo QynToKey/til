@@ -3,6 +3,7 @@
 ## 0️⃣ 現状と実装方針
 
 > 現状
+
 `ReadingSessionsController` には `index` / `join` のみで、セッション作成機能が未実装
 
 > 実装方針
