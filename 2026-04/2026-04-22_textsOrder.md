@@ -104,3 +104,122 @@ $ docker compose exec web bin/rails db:migrate
 ```
 
 ---
+
+## 3️⃣ `Admin::ReadingSessions` コントローラーを更新（管理者側）
+
+👉 *`create` と `update` の保存後に `save_positions` `を呼ぶ処理を追加し、reading_session_params` と `private` メソッドを更新*
+
+```ruby
+# app/controllers/admin/reading_sessions_controller.rb
+class Admin::ReadingSessionsController < ApplicationController
+  # 管理者専用のコントローラー
+  before_action :require_admin
+  before_action :set_reading_session, only: %i[ edit update destroy ]
+
+  def index
+    @reading_sessions = ReadingSession.includes(:creator, :texts).order(created_at: :desc)
+  end
+
+  def new
+    @reading_session = ReadingSession.new
+    @texts = Text.order(:title)
+  end
+
+  def create
+    @reading_session = ReadingSession.new(reading_session_params)
+    @reading_session.creator = current_user
+    # セッションの招待トークンを生成
+    @reading_session.invite_token = SecureRandom.urlsafe_base64
+
+    if @reading_session.save
+      save_positions
+      redirect_to admin_reading_sessions_path, notice: "セッションを作成しました"
+    else
+      @texts = Text.order(:title)
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def edit
+    @texts = Text.order(:title)
+  end
+
+  def update
+    if @reading_session.update(reading_session_params)
+      save_positions
+      redirect_to admin_reading_sessions_path, notice: t("admin.reading_sessions.update.success")
+    else
+      @texts = Text.order(:title)
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @reading_session.destroy
+    redirect_to admin_reading_sessions_path, notice: t("admin.reading_sessions.destroy.success")
+  end
+
+  private
+
+  # 管理者でないユーザーのアクセスを制限するメソッド
+  def set_reading_session
+    @reading_session = ReadingSession.find(params[:id])
+  end
+
+  # ストロングパラメーター: セッション作成に必要なパラメーターを許可する
+  def reading_session_params
+    params.require(:reading_session).permit(:name, text_ids: [])
+  end
+
+  # ストロングパラメーター: セッション更新に必要なパラメーターを許可する
+  def reading_session_params
+    params.require(:reading_session).permit(:name, enforce_order, text_ids: [], text_position: {})
+  end
+
+  # テキストの順番を保存するメソッド
+  def save_positions
+    return if params[:reading_session][:test_positions].blank?
+    # テキストIDと位置のペアをループして保存
+    params[:reading_session][:text_positions].each do |text_id, position|
+      # 位置が空の場合はスキップ
+      next if position.blank?
+      @reading_session.reading_session_texts.find_by(text_id: text_id)
+      &.update(position: position.to_i)
+    end
+  end
+end
+```
+
+---
+
+## 4️⃣ `Reading_sessions` / `Texts` コントローラーを更新（一般ユーザー側）
+
+```ruby
+# app/controllers/reading_sessions_controller.rb
+  def show
+    ・・・
+    # セッションのテキストを順序付きで取得する。順序が指定されている場合は position カラムでソートする
+    @texts = if @reading_session.enforce_order?
+      @reading_session.texts.order("reading_session_texts.position ASC NULLS LAST")
+    else
+      @reading_session.texts
+    end
+  end
+```
+
+```ruby
+# app/controllers/texts_controller.rb
+  def show
+    # セッションのテキストを順序付きで取得する。順序が指定されている場合は position カラムでソートする
+    session_text = if @reading_session.enforce_order?
+      @reading_session.texts.order("reading_session_texts.position ASC NULLS LAST")
+    else
+      @reading_session.texts.order(:id)
+    end
+    current_index = session_text.index(@text)
+    @prev_text = session_text[current_index - 1] if current_index > 0
+    @next_text = session_text[current_index + 1]
+  end
+```
+
+---
