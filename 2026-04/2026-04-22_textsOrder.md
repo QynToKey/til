@@ -166,25 +166,21 @@ class Admin::ReadingSessionsController < ApplicationController
     @reading_session = ReadingSession.find(params[:id])
   end
 
-  # ストロングパラメーター: セッション作成に必要なパラメーターを許可する
-  def reading_session_params
-    params.require(:reading_session).permit(:name, text_ids: [])
-  end
-
   # ストロングパラメーター: セッション更新に必要なパラメーターを許可する
   def reading_session_params
-    params.require(:reading_session).permit(:name, enforce_order, text_ids: [], text_position: {})
+    params.require(:reading_session).permit(:name, :enforce_order, text_ids: [])
   end
 
   # テキストの順番を保存するメソッド
   def save_positions
-    return if params[:reading_session][:test_positions].blank?
+    # テキストIDと位置のペアを params から取得
+    text_positions = params.dig(:reading_session, :text_positions)
+    return if params[:reading_session][:text_positions].blank?
     # テキストIDと位置のペアをループして保存
     params[:reading_session][:text_positions].each do |text_id, position|
       # 位置が空の場合はスキップ
       next if position.blank?
-      @reading_session.reading_session_texts.find_by(text_id: text_id)
-      &.update(position: position.to_i)
+      @reading_session.reading_session_texts.find_by(text_id: text_id)&.update(position: position.to_i)
     end
   end
 end
@@ -220,6 +216,49 @@ end
     @prev_text = session_text[current_index - 1] if current_index > 0
     @next_text = session_text[current_index + 1]
   end
+```
+
+---
+
+## 5️⃣ ER 図を更新
+
+### `reading_sessions` の責務説明（32〜33行目）**
+
+```diff
+ - 特定のテキストを対象とした読書セッション
+ - 招待トークン（`invite_token`）による URL 招待方式で参加者を管理する
++- `enforce_order` でテキストの閲覧順を固定するかどうかを管理する
+```
+
+### `reading_session_texts` の責務説明（36〜38行目）**
+
+```diff
+ - セッションとテキストの多対多の関係を管理する中間テーブル
+ - 1 セッションに複数のテキストを紐づけることができる
++- `position` でセッション内のテキスト表示順を管理する
+```
+
+### Mermaid ER 図の2テーブル
+
+```diff
+     READING_SESSIONS {
+         bigint id PK
+         bigint created_by FK "NOT NULL"
+         string name
+         string invite_token "NOT NULL, UNIQUE"
++        boolean enforce_order "NOT NULL, DEFAULT false"
+         datetime created_at
+         datetime updated_at
+     }
+
+     READING_SESSION_TEXTS {
+         bigint id PK
+         bigint reading_session_id FK "NOT NULL"
+         bigint text_id FK "NOT NULL"
++        integer position
+         datetime created_at
+         datetime updated_at
+     }
 ```
 
 ---
