@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 16）： セッション内テキストのアクセス順序制御
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 16_1）： セッション内テキストのアクセス順序制御
 
 ## 0️⃣ 実装方針
 
