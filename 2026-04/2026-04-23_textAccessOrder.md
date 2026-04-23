@@ -179,3 +179,51 @@ end
 +
   <div class="d-flex justify-content-center align-items-center gap-3 mt-5">
 ```
+
+---
+
+## 7️⃣ `TextsController` を修正
+
+```ruby
+# app/controllers/texts_controller.rb
+  before_action :require_login
+  before_action :set_text
+  before_action :set_reading_session
+  before_action :require_membership
++ before_action :check_order_access
+
+  def show
+    record_reading
+```
+
+```ruby
+# app/controllers/texts_controller.rb
+  def require_membership
+    unless @reading_session.users.include?(current_user)
+      redirect_to reading_sessions_path, alert: "参加していないセッションです"
+    end
+  end
+
++ def check_order_access
++   return unless @reading_session.enforce_order?
++
++   membership = @reading_session.memberships.find_by(user: current_user)
++   current_position = @reading_session.reading_session_texts
++                        .find_by(text: @text)&.position
++
++   return if current_position.nil? || current_position <= 1
++
++   all_previous_read = @reading_session.reading_session_texts
++     .where("position < ?", current_position)
++     .all? { |rst| membership.text_readings.exists?(text: rst.text) }
++
++   unless all_previous_read
++     redirect_to reading_session_path(@reading_session),
++                 alert: "前のテキストを読了してからアクセスしてください"
++   end
++ end
+```
+
+---
+
+## 8️⃣ ER 図を更新
