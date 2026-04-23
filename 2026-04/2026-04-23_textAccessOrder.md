@@ -102,3 +102,80 @@ end
 👉 *`text_reading` はテキスト1本につき1件しか存在しないため、ID を URL に含める必要がない*
 
 ---
+
+## 4️⃣ `TextReadings` コントローラーを作成
+
+```bash
+touch app/controllers/text_readings_controller.rb
+```
+
+```ruby
+# app/controllers/text_readings_controller.rb
+class TextReadingsController < ApplicationController
+  # ユーザーが特定のテキストを読んだことを記録するためのコントローラー。
+  before_action :require_login
+  before_action :set_reading_session
+  before_action :set_text
+
+  def create
+    membership = @reading_session.memberships.find_by(user: current_user)
+    # すでに読んだことがある場合は更新、ない場合は新規作成
+    membership.text_readings.find_or_create_by(text: @text) do |tr|
+      tr.read_at = Time.current # tr は text_reading
+    end
+    redirect_to reading_session_text_path(@reading_session, @text)
+  end
+
+  private
+
+  # セッションとテキストをセットするためのメソッド
+  def set_reading_session
+    @reading_session = ReadingSession.find(params[:reading_session_id])
+  end
+
+  # テキストをセットするためのメソッド
+  def set_text
+    @text = Text.find(params[:text_id])
+  end
+end
+```
+
+---
+
+## 5️⃣ `Membership` モデルに `reading_text` を追加
+
+```ruby
+  class Membership < ApplicationRecord
+    belongs_to :user
+    belongs_to :reading_session
++   has_many :text_readings, dependent: :destroy
+
+    enum :session_role, { member: 0, session_admin: 1 }
+    enum :mode, { solo: 0, co_reading: 1 }
+```
+
+---
+
+## 6️⃣「テキスト詳細」に「読了ボタン」を実装
+
+```erb
+<%# app/views/texts/show.html.erb %>
+  <div class="lh-lg">
+    <%= simple_format(@text.body) %>
+  </div>
+
++  <% membership = @reading_session.memberships.find_by(user: current_user) %>
++  <% already_read = membership.text_readings.exists?(text: @text) %>
++
++  <div class="text-center mt-5">
++    <% if already_read %>
++      <span class="btn btn-success disabled"><i class="bi bi-check-lg"></i> 読了</span>
++    <% else %>
++      <%= button_to "読了にする",
++            reading_session_text_text_reading_path(@reading_session, @text),
++            class: "btn btn-outline-success" %>
++    <% end %>
++  </div>
++
+  <div class="d-flex justify-content-center align-items-center gap-3 mt-5">
+```
