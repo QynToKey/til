@@ -240,4 +240,4 @@ mkdir -p app/views/admin/admins/ && touch app/views/admin/admins/index.html.erb
 
 ---
 
-#### 総学習時間： 1270.5 時間
+#### 総学習時間： 1260.7 時間
