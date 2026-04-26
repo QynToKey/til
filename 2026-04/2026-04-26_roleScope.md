@@ -73,7 +73,13 @@ def set_text
 
 ---
 
-## 「開発者」`superadmin`
+## 「開発者」`superadmin` の「管理者管理」機能
+
+> 設計
+
+- 「開発者」は「管理者」を招待登録する。
+- 「開発者」は「管理者」の情報を編集できない。*（`index` / 招待方式による `create` / `destroy` のみ）*
+- 「開発者」は「管理者によるセッション」の内容を関知しない。
 
 ---
 
@@ -94,7 +100,7 @@ def set_text
 
 ---
 
-## 4️⃣ ルーティングに `resources :admins` を追加
+### 4️⃣ ルーティングに `resources :admins` を追加
 
 ```ruby
 # config/routes.rb
@@ -111,7 +117,7 @@ def set_text
 
 ---
 
-## 5️⃣ `Admin::AdminsController` を作成
+### 5️⃣ `Admin::AdminsController` を作成
 
 ```bash
 touch app/controllers/admin/admins_controller.rb
