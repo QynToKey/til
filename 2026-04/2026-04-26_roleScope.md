@@ -79,7 +79,7 @@ def set_text
 
 - 「開発者」は「管理者」を招待登録する。
 - 「開発者」は「管理者」の情報を編集できない。*（`index` / 招待方式による `create` / `destroy` のみ）*
-- 「開発者」は「管理者によるセッション」の内容を関知しない。
+- 「開発者」は「管理者によるセッション」の内容を関知しないが、アプリ全体の稼働状況は把握しておく必要がある。
 
 ---
 
@@ -132,6 +132,15 @@ class Admin::AdminsController < ApplicationController
 
   def index
     @admins = User.where(role: :admin).order(created_at: :desc)
+
+    # 管理者ごとの作成したReadingSessionの数
+    @sessions_counts = ReadingSession.where(created_by_id: @admins.ids).group(:created_by_id).count
+
+    # 管理者が作成したReadingSessionに参加しているユーザーの数
+    @memberships_counts = Membership.joins(:reading_sessions).where(reading_sessions: { created_by_id: @admins.ids }).group(:user_id).count
+
+    @total_sessions = @sessions_counts.values.sum
+    @total_memberships = @memberships_counts.values.sum
   end
 
   # AdminRegistrationTokenを生成し、そのトークンを含む招待URLを作成して、管理者一覧ページにリダイレクト。
@@ -177,6 +186,8 @@ mkdir -p app/views/admin/admins/ && touch app/views/admin/admins/index.html.erb
         <th><%= t("admin.admins.index.table_name") %></th>
         <th><%= t("admin.admins.index.table_email") %></th>
         <th><%= t("admin.admins.index.table_created_at") %></th>
+        <th><%= t("admin.admins.index.table_sessions") %></th>
+        <th><%= t("admin.admins.index.table_participants") %></th>
         <th></th>
       </tr>
     </thead>
@@ -186,11 +197,19 @@ mkdir -p app/views/admin/admins/ && touch app/views/admin/admins/index.html.erb
           <td><%= admin_user.name %></td>
           <td><%= admin_user.email %></td>
           <td><%= admin_user.created_at.strftime("%Y/%m/%d %H:%M") %></td>
+          <td><%= @session_counts[admin_user.id].to_i %></td>
+          <td><%= @membership_counts[admin_user.id].to_i %></td>
           <td>
             <%= button_to t("admin.admins.index.destroy"), admin_admin_path(admin_user), method: :delete, class: "btn btn-sm btn-outline-danger", form: { class: "d-inline" }, data: { turbo_confirm: t("admin.admins.index.confirm_destroy") } %>
           </td>
         </tr>
       <% end %>
+      <tr class="table-secondary fw-bold">
+        <td colspan="3"><%= t("admin.admins.index.total") %></td>
+        <td><%= @total_sessions %></td>
+        <td><%= @total_memberships %></td>
+        <td></td>
+      </tr>
     </tbody>
   </table>
 </div>
@@ -234,6 +253,9 @@ mkdir -p app/views/admin/admins/ && touch app/views/admin/admins/index.html.erb
 +       table_created_at: "登録日時"
 +       destroy: "削除"
 +       confirm_destroy: "本当に削除しますか？"
+        table_sessions: "セッション数"
+        table_participants: "参加者数（のべ）"
+        total: "合計"
 +     destroy:
 +       success: "管理者を削除しました"
 ```
