@@ -169,4 +169,4 @@ $ docker compose exec web bin/rails db:migrate
 
 ---
 
-#### そう隔週時間： 1270.1 時間
+#### 総学習時間： 1270.1 時間
