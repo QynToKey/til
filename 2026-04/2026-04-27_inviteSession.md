@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 20_2）： 招待フロー設計の見直し（#124・#125 → #127）
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 20_2）： 招待フロー設計の見直し（#124・#125 →#127）
 
 ## 経緯
 
