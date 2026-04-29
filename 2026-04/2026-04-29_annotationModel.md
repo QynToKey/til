@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 22）： 書き込みモデル設計
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 22_1）： 書き込みモデル設計
 
 ---
 
