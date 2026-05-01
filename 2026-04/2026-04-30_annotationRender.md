@@ -84,7 +84,7 @@
           class="d-none position-absolute bg-dark text-white rounded px-2 py-1"
           style="z-index: 1000; white-space: nowrap;">
 +      <span class="me-2">
-+        <% [["#ffeb3b","黄"],["#a8d8a8","緑"],["#ffb3b3","ピンク"],["#b3d4ff","青"]].each do |color, label| %>
++        <% [["#ffeb3b","黄"],["#86d188","緑"],["#ffb3b3","ピンク"],["#b3d4ff","青"]].each do |color, label| %>
 +          <button data-action="click->text-selection#selectColor"
 +                  data-color="<%= color %>"
 +                  class="annotation-color-swatch<%= color == '#ffeb3b' ? ' selected' : '' %>"
@@ -132,30 +132,50 @@ data-controller 要素に `@annotations` を JSON で渡す。
 
 import { Controller } from "@hotwired/stimulus"
 
+// スウォッチ色（ハイライト用）に対応するアンダーライン用の色を返す
+// factor で一律に暗くすると彩度も落ちてグレーに見えるため、色ごとに絶対値で指定する
+// ?? hex は「マップに存在しない色が渡された場合はそのまま返す」という意味（将来色を追加した場合の安全弁）
+function underlineColor(hex) {
+  const map = {
+    "#ffb3b3": "#dc3545",  // Bootstrap danger（ピンク → 赤）
+    "#b3d4ff": "#0d6efd",  // Bootstrap primary（薄青 → 青）
+  }
+  return map[hex] ?? hex
+}
+
 export default class extends Controller {
   static targets = ["body", "toolbar", "editPopup"]
   static values  = { url: String, annotations: Array, deleteBaseUrl: String }
 
-  #startPosition     = null  // 新規アノテーション：選択範囲の開始オフセット
-  #endPosition       = null  // 新規アノテーション：選択範囲の終了オフセット
-  #selectedColor     = "#ffeb3b"  // 新規アノテーション：選択中の色
-  #activeAnnotations = {}    // 編集中の位置にある type→span のマップ例: { highlight: span, underline: span }
-  #editStart         = null  // 編集中の位置の開始オフセット
-  #editEnd           = null  // 編集中の位置の終了オフセット
+  #startPosition      = null      // 新規アノテーション：選択範囲の開始オフセット
+  #endPosition        = null      // 新規アノテーション：選択範囲の終了オフセット
+  #selectedColor      = "#ffeb3b" // 新規アノテーション：選択中の色
+  #toolbarFocusedType = null      // ツールバー内で選択中の型（null = 未選択）
+  #toolbarAnnotations = {}        // ツールバーセッション内で作成済みの type→span マップ
+                                  // 2周目以降は POST ではなく PATCH で色を更新するために使う
+  #activeAnnotations  = {}        // 編集中の位置にある type→span のマップ
+  #focusedType        = null      // ポップアップ内で選択中の型（null = 未選択）
+  #editStart          = null      // 編集中の位置の開始オフセット
+  #editEnd            = null      // 編集中の位置の終了オフセット
 
   connect() {
-    this._onMouseup  = this.#handleMouseup.bind(this)
-    this._onClick    = this.#handleClick.bind(this)
-    this._onDocClick = this.#handleDocumentClick.bind(this)
+    this._onMouseup   = this.#handleMouseup.bind(this)
+    this._onClick     = this.#handleClick.bind(this)
+    this._onDocClick  = this.#handleDocumentClick.bind(this)
+    // editPopup は Stimulus action を使わず、直接リスナーを登録する
+    // stopPropagation() を確実に呼ぶことで document リスナーへの干渉を防ぐ
+    this._onPopupClick = this.#handlePopupClick.bind(this)
     this.bodyTarget.addEventListener("mouseup", this._onMouseup)
     this.bodyTarget.addEventListener("click",   this._onClick)
     document.addEventListener("click",          this._onDocClick)
+    this.editPopupTarget.addEventListener("click", this._onPopupClick)
   }
 
   disconnect() {
     this.bodyTarget.removeEventListener("mouseup", this._onMouseup)
     this.bodyTarget.removeEventListener("click",   this._onClick)
     document.removeEventListener("click",          this._onDocClick)
+    this.editPopupTarget.removeEventListener("click", this._onPopupClick)
   }
 
   // ページロード時に既存アノテーションを自動描画する（Value コールバック）
@@ -171,36 +191,83 @@ export default class extends Controller {
     })
   }
 
-  // 新規アノテーション作成時の色スウォッチ選択
+  // ツールバーの色スウォッチをクリックする
+  // 型が未選択の場合は選択色の更新だけ行う
+  // 型が選択済みの場合：
+  //   - 今回のツールバーセッションでまだ作成していない型 → POST で新規作成
+  //   - すでに作成済みの型 → PATCH で色だけ更新（重複作成を防ぎ、試行錯誤を可能にする）
   selectColor(event) {
-    this.#selectedColor = event.currentTarget.dataset.color
-    this.element.querySelectorAll(".annotation-color-swatch").forEach(el => {
-      el.classList.toggle("selected", el.dataset.color === this.#selectedColor)
+    const color = event.currentTarget.dataset.color
+    this.#selectedColor = color
+    // ツールバー内のスウォッチのみ .selected を更新する（editPopup に影響させない）
+    this.toolbarTarget.querySelectorAll(".annotation-color-swatch").forEach(el => {
+      el.classList.toggle("selected", el.dataset.color === color)
     })
+
+    // 型が選択されていなければここで終了
+    if (!this.#toolbarFocusedType) return
+
+    const type  = this.#toolbarFocusedType
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+
+    if (this.#toolbarAnnotations[type]) {
+      // ── 作成済みの型 → 色を更新する（PATCH） ──────────────────────────
+      const span = this.#toolbarAnnotations[type]
+      const id   = span.dataset.annotationId
+      fetch(`${this.deleteBaseUrlValue}${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+        body: JSON.stringify({ annotation: { color } })
+      })
+      .then(res => {
+        if (res.ok) {
+          // 両プロパティをいったんクリアしてから設定する（スタイル残りを防ぐ）
+          span.style.backgroundColor   = ""
+          span.style.borderBottomColor = ""
+          if (type === "highlight") {
+            span.style.backgroundColor = color
+          } else {
+            // アンダーラインはスウォッチ色をそのまま使うと細い線では薄く見えるため、暗くした色を適用する
+            span.style.borderBottomColor = underlineColor(color)
+          }
+          this.#resetToolbarTypeSelection()
+        }
+      })
+
+    } else {
+      // ── 未作成の型 → 新規作成する（POST） ────────────────────────────
+      const start = this.#startPosition
+      const end   = this.#endPosition
+      fetch(this.urlValue, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+        body: JSON.stringify({
+          annotation: { start_position: start, end_position: end, annotation_type: type, color }
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.id) {
+          const newSpan = this.#renderAnnotation({ ...data, start_position: start, end_position: end, color })
+          // 作成した span を記録しておく（2周目以降で PATCH に切り替えるため）
+          if (newSpan) this.#toolbarAnnotations[type] = newSpan
+          this.#resetToolbarTypeSelection()
+        }
+      })
+    }
   }
 
-  // ハイライト／アンダーラインボタンをクリックして保存する
+  // ツールバーのHL／ULボタンをクリックして編集対象の型を選択する
+  // 同じ型を再クリックすると選択解除になる（トグル）
   annotate(event) {
-    const annotationType = event.currentTarget.dataset.type
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-    const start = this.#startPosition
-    const end   = this.#endPosition
-    const color = this.#selectedColor
-
-    fetch(this.urlValue, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
-      body: JSON.stringify({
-        annotation: { start_position: start, end_position: end, annotation_type: annotationType, color }
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.id) {
-        this.#renderAnnotation({ ...data, start_position: start, end_position: end, color })
-        this.#hideToolbar()
-        window.getSelection()?.removeAllRanges()
-      }
+    const type = event.currentTarget.dataset.type
+    this.#toolbarFocusedType = (this.#toolbarFocusedType === type) ? null : type
+    // 選択中のボタンに白い box-shadow を付ける
+    // Bootstrap が outline: 0 で上書きするため、インラインスタイルで確実に表示する
+    this.toolbarTarget.querySelectorAll("[data-type]").forEach(btn => {
+      const isFocused = btn.dataset.type === this.#toolbarFocusedType
+      btn.classList.toggle("active", isFocused)
+      btn.style.boxShadow = isFocused ? "0 0 0 3px white" : ""
     })
   }
 
@@ -208,12 +275,19 @@ export default class extends Controller {
   #handleClick(event) {
     if (this.toolbarTarget.contains(event.target)) return
     if (this.editPopupTarget.contains(event.target)) return
+    // ドラッグ選択直後の click はテキスト選択が残っているのでツールバーを閉じない
+    // isCollapsed が false = 選択範囲あり = mouseup で表示したツールバーを維持する
+    const sel = window.getSelection()
+    if (sel && !sel.isCollapsed) return
+    // アノテーションをクリックした時点でツールバーが開いていれば閉じる
+    this.#hideToolbar()
 
     // クリック位置から annotation span を内側→外側へ遡って全件収集する
     // 同一範囲に HL と UL が重なっている場合、入れ子になっているので両方取得できる
     this.#activeAnnotations = {}
-    this.#editStart = null
-    this.#editEnd   = null
+    this.#focusedType = null
+    this.#editStart   = null
+    this.#editEnd     = null
 
     let target = event.target.closest("[data-annotation-id]")
     while (target) {
@@ -228,7 +302,6 @@ export default class extends Controller {
           this.#editEnd   = parseInt(target.dataset.endPosition)
         }
       }
-      // 親要素に annotation span があればそちらも収集する
       target = target.parentElement?.closest("[data-annotation-id]")
     }
 
@@ -237,159 +310,158 @@ export default class extends Controller {
       return
     }
 
-    // ポップアップを span の直下に配置する
+    // span の下端を基準にポップアップを配置する
+    // getBoundingClientRect().bottom でフォントサイズ・行高さ・アンダーラインを自動的に考慮できる
     const anySpan = Object.values(this.#activeAnnotations)[0]
     const rect    = anySpan.getBoundingClientRect()
     const popup   = this.editPopupTarget
     popup.style.position  = "absolute"
-    popup.style.top       = `${rect.bottom + window.scrollY + 8}px`
+    popup.style.top       = `${rect.bottom + window.scrollY + 16}px`
     popup.style.left      = `${rect.left + window.scrollX + rect.width / 2}px`
     popup.style.transform = "translateX(-50%)"
 
-    // 現在存在する型のボタンに .active を付けて視覚的に示す
-    this.editPopupTarget.querySelectorAll("[data-type]").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.type in this.#activeAnnotations)
+    // 初期状態はどちらの型も非アクティブ（ユーザーが選択してから編集を始める）
+    // Bootstrap が outline を上書きするため、box-shadow インラインスタイルをリセットする
+    this.editPopupTarget.querySelectorAll("[data-popup-action='type']").forEach(btn => {
+      btn.classList.remove("active")
+      btn.style.boxShadow = ""
     })
     popup.classList.remove("d-none")
   }
 
-  // コントローラー要素の外をクリックしたらポップアップを閉じる
+  // コントローラー要素の外をクリックしたらポップアップとツールバーを閉じる
   #handleDocumentClick(event) {
     if (this.element.contains(event.target)) return
     this.#hideEditPopup()
+    this.#hideToolbar()
   }
 
-  // 編集ポップアップの色スウォッチをクリックして色を変更する
-  // 同一位置に複数の型がある場合はすべてに同じ色を適用する
-  changeColor(event) {
-    if (Object.keys(this.#activeAnnotations).length === 0) return
+  // editPopup 内のクリックをすべてここで処理する
+  // Stimulus action を使わず直接リスナーを登録することで、
+  // document への伝播を確実に止め #handleDocumentClick との干渉を防ぐ
+  #handlePopupClick(event) {
+    // ポップアップ内クリックが document リスナーに届かないようにする
+    event.stopPropagation()
 
-    const color = event.currentTarget.dataset.color
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    // クリックされた要素から data-popup-action を持つボタンを探す
+    const btn = event.target.closest("[data-popup-action]")
+    if (!btn) return
 
-    // 各 span に対して PATCH リクエストを並列で送る
-    const promises = Object.entries(this.#activeAnnotations).map(([type, span]) => {
-      const id = span.dataset.annotationId
-      return fetch(`${this.deleteBaseUrlValue}${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
-        body: JSON.stringify({ annotation: { color } })
+    const action = btn.dataset.popupAction
+    const token  = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+
+    if (action === "type") {
+      // ── 型ボタン：選択中の型を切り替える（トグル） ─────────────────
+      // 同じ型を再クリックしたら選択解除
+      const type = btn.dataset.type
+      this.#focusedType = (this.#focusedType === type) ? null : type
+      // 選択中のボタンに白い box-shadow を付ける
+      // Bootstrap が outline: 0 で上書きするため、インラインスタイルで確実に表示する
+      this.editPopupTarget.querySelectorAll("[data-popup-action='type']").forEach(b => {
+        const isFocused = b.dataset.type === this.#focusedType
+        b.classList.toggle("active", isFocused)
+        b.style.boxShadow = isFocused ? "0 0 0 3px white" : ""
       })
-      .then(res => {
-        if (res.ok) {
-          // 型に応じたスタイルプロパティを更新する
-          if (type === "highlight") {
-            span.style.backgroundColor = color
-          } else {
-            span.style.borderBottomColor = color
+
+    } else if (action === "color") {
+      // ── 色スウォッチ：選択中の型に色を適用する ──────────────────────
+      // 型が選択されていない場合は何もしない
+      if (!this.#focusedType) return
+
+      const type  = this.#focusedType
+      const color = btn.dataset.color
+
+      if (this.#activeAnnotations[type]) {
+        // 既存アノテーションの色を更新する（PATCH）
+        const span = this.#activeAnnotations[type]
+        const id   = span.dataset.annotationId
+        fetch(`${this.deleteBaseUrlValue}${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+          body: JSON.stringify({ annotation: { color } })
+        })
+        .then(res => {
+          if (res.ok) {
+            // 両プロパティをいったんクリアしてから設定する
+            // 型変更を経た span に古いスタイルが残っている場合の上書き漏れを防ぐ
+            span.style.backgroundColor   = ""
+            span.style.borderBottomColor = ""
+            if (type === "highlight") {
+              span.style.backgroundColor = color
+            } else {
+              // アンダーラインはスウォッチ色をそのまま使うと細い線では薄く見えるため、暗くした色を適用する
+              span.style.borderBottomColor = underlineColor(color)
+            }
+            // ポップアップは閉じない（引き続き他の型の編集ができる）
           }
-        }
-      })
-    })
+        })
+      } else {
+        // 選択した色で新しいアノテーションを作成する（POST）
+        // オフセットが取得できていない場合は何もしない
+        if (this.#editStart === null || isNaN(this.#editStart)) return
+        fetch(this.urlValue, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+          body: JSON.stringify({
+            annotation: {
+              start_position:  this.#editStart,
+              end_position:    this.#editEnd,
+              annotation_type: type,
+              color
+            }
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.id) {
+            // DOM に描画し、返ってきた span を activeAnnotations に登録する
+            const newSpan = this.#renderAnnotation({
+              ...data,
+              start_position: this.#editStart,
+              end_position:   this.#editEnd,
+              color
+            })
+            if (newSpan) this.#activeAnnotations[type] = newSpan
+            // ポップアップは閉じない（引き続き色の変更や他の型の追加ができる）
+          }
+        })
+      }
 
-    // 全リクエストが完了したらポップアップを閉じる
-    Promise.all(promises).then(() => this.#hideEditPopup())
-  }
-
-  // 編集ポップアップの種別ボタンをクリックする
-  // 既に存在する型 → 削除（ボタンをオフ）
-  // 存在しない型  → 新規追加（ボタンをオン）
-  changeType(event) {
-    const type  = event.currentTarget.dataset.type
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-
-    if (this.#activeAnnotations[type]) {
-      // ── 削除パス ──────────────────────────────────────────────
+    } else if (action === "delete") {
+      // ── 削除ボタン：選択中の型のアノテーションだけを削除する ──────────
+      // 型が選択されていない場合は何もしない
+      if (!this.#focusedType) return
+      const type = this.#focusedType
       const span = this.#activeAnnotations[type]
-      const id   = span.dataset.annotationId
+      if (!span) return
 
+      const id = span.dataset.annotationId
       fetch(`${this.deleteBaseUrlValue}${id}`, {
         method: "DELETE",
         headers: { "X-CSRF-Token": token }
       })
       .then(res => {
         if (res.ok) {
-          // span の中身を親に移してから span 要素を取り除く
+          // span の中身を親ノードに戻してから span を除去する
           const parent = span.parentNode
           while (span.firstChild) parent.insertBefore(span.firstChild, span)
           parent.removeChild(span)
-          parent.normalize()
-
+          // 隣接テキストノードを結合し、次回のオフセット計算を正確にする
+          this.bodyTarget.normalize()
+          // 削除した型を activeAnnotations から除く
           delete this.#activeAnnotations[type]
-
-          // 別の型がまだ残っていればボタン状態を更新、なければポップアップを閉じる
-          if (Object.keys(this.#activeAnnotations).length > 0) {
-            this.editPopupTarget.querySelectorAll("[data-type]").forEach(btn => {
-              btn.classList.toggle("active", btn.dataset.type in this.#activeAnnotations)
-            })
-          } else {
+          this.#focusedType = null
+          this.editPopupTarget.querySelectorAll("[data-popup-action='type']").forEach(b => {
+            b.classList.remove("active")
+            b.style.boxShadow = ""
+          })
+          // 残りのアノテーションがなければポップアップを閉じる
+          if (Object.keys(this.#activeAnnotations).length === 0) {
             this.#hideEditPopup()
           }
         }
       })
-    } else {
-      // ── 追加パス ──────────────────────────────────────────────
-      // 型ごとのデフォルト色で新しいアノテーションを作成する
-      const defaultColors = { highlight: "#ffeb3b", underline: "#2196f3" }
-      const color = defaultColors[type] ?? "#ffeb3b"
-
-      fetch(this.urlValue, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
-        body: JSON.stringify({
-          annotation: {
-            start_position:  this.#editStart,
-            end_position:    this.#editEnd,
-            annotation_type: type,
-            color
-          }
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.id) {
-          this.#renderAnnotation({
-            ...data,
-            start_position: this.#editStart,
-            end_position:   this.#editEnd,
-            color
-          })
-          // DOM が更新されたのでポップアップを閉じる
-          // 再クリックすると両方の型がアクティブな状態で開く
-          this.#hideEditPopup()
-        }
-      })
     }
-  }
-
-  // 削除ボタンをクリックして、同一位置の全アノテーションを削除する
-  deleteAnnotation() {
-    if (Object.keys(this.#activeAnnotations).length === 0) return
-
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-
-    // 全 span に DELETE リクエストを並列で送る
-    const promises = Object.entries(this.#activeAnnotations).map(([_type, span]) => {
-      const id = span.dataset.annotationId
-      return fetch(`${this.deleteBaseUrlValue}${id}`, {
-        method: "DELETE",
-        headers: { "X-CSRF-Token": token }
-      })
-      .then(res => {
-        if (res.ok) {
-          const parent = span.parentNode
-          while (span.firstChild) parent.insertBefore(span.firstChild, span)
-          parent.removeChild(span)
-        }
-      })
-    })
-
-    // 全削除完了後にテキストノードを結合してからポップアップを閉じる
-    // normalize() で隣接テキストノードを1つに統合し、次回のオフセット計算を正確にする
-    Promise.all(promises).then(() => {
-      this.bodyTarget.normalize()
-      this.#hideEditPopup()
-    })
   }
 
   // テキスト選択時にツールバーを表示し、編集ポップアップを閉じる
@@ -408,39 +480,105 @@ export default class extends Controller {
       return
     }
 
-    this.#startPosition = this.#getTextOffset(container, range.startContainer, range.startOffset)
-    this.#endPosition   = this.#getTextOffset(container, range.endContainer,   range.endOffset)
+    this.#startPosition      = this.#getTextOffset(container, range.startContainer, range.startOffset)
+    this.#endPosition        = this.#getTextOffset(container, range.endContainer,   range.endOffset)
+    this.#toolbarAnnotations = {}   // 新しい選択のたびにセッションをリセットする
+
+    // 選択範囲と重なる既存アノテーション span を収集する
+    // ・toolbarAnnotations に登録 → selectColor で同型を選んだとき POST ではなく PATCH になり重複作成を防ぐ
+    // ・overlappingSpans に収集 → 後続のカバレッジ判定に使う
+    // 重なり判定：span の範囲と選択範囲が 1 文字でも重なっていれば対象とする
+    const selStart = this.#startPosition
+    const selEnd   = this.#endPosition
+    const overlappingSpans = []
+    container.querySelectorAll("[data-annotation-id]").forEach(span => {
+      const spanStart = parseInt(span.dataset.startPosition)
+      const spanEnd   = parseInt(span.dataset.endPosition)
+      if (spanStart < selEnd && spanEnd > selStart) {
+        const type = [...span.classList].find(c => c.startsWith("annotation-"))?.replace("annotation-", "")
+        if (type && !this.#toolbarAnnotations[type]) {
+          this.#toolbarAnnotations[type] = span
+          overlappingSpans.push(span)
+        }
+      }
+    })
+
+    // 選択範囲が既存アノテーションで完全にカバーされている場合はポップアップを表示する
+    // 一部でもカバーされていない場合（未注釈箇所を含む、またはアノテーションがない）はツールバーを表示する
+    if (overlappingSpans.length > 0 && this.#isFullyCovered(selStart, selEnd, overlappingSpans)) {
+      this.#hideToolbar()
+      this.#activeAnnotations = { ...this.#toolbarAnnotations }
+      this.#focusedType = null
+      this.#editStart   = selStart
+      this.#editEnd     = selEnd
+      this.#toolbarAnnotations = {}
+      const anySpan = overlappingSpans[0]
+      const popupRect = anySpan.getBoundingClientRect()
+      const popup = this.editPopupTarget
+      this.editPopupTarget.querySelectorAll("[data-popup-action='type']").forEach(btn => {
+        btn.classList.remove("active")
+        btn.style.boxShadow = ""
+      })
+      popup.style.position  = "absolute"
+      popup.style.top       = `${popupRect.bottom + window.scrollY + 16}px`
+      popup.style.left      = `${popupRect.left + window.scrollX + popupRect.width / 2}px`
+      popup.style.transform = "translateX(-50%)"
+      popup.classList.remove("d-none")
+      return
+    }
 
     const rect = range.getBoundingClientRect()
     const toolbar = this.toolbarTarget
+    // 先に d-none を外して offsetHeight を確定させてから top を計算する
+    // d-none のまま offsetHeight を読むと 0 になり、ツールバーがテキスト上に重なってしまう
+    this.#hideEditPopup()
+    toolbar.classList.remove("d-none")
     toolbar.style.position  = "absolute"
     toolbar.style.top       = `${rect.top + window.scrollY - toolbar.offsetHeight - 8}px`
     toolbar.style.left      = `${rect.left + window.scrollX + rect.width / 2}px`
     toolbar.style.transform = "translateX(-50%)"
-    // 編集ポップアップが開いていれば閉じる
-    this.#hideEditPopup()
-    toolbar.classList.remove("d-none")
   }
 
   #hideToolbar() {
     this.toolbarTarget.classList.add("d-none")
-    this.#startPosition = null
-    this.#endPosition   = null
+    this.#startPosition      = null
+    this.#endPosition        = null
+    this.#toolbarAnnotations = {}   // セッション内の作成記録をリセットする
+    // 型選択状態と box-shadow をリセットする
+    this.#toolbarFocusedType = null
+    this.toolbarTarget.querySelectorAll("[data-type]").forEach(btn => {
+      btn.classList.remove("active")
+      btn.style.boxShadow = ""
+    })
+  }
+
+  // ツールバーの型選択状態だけをリセットする（ツールバー自体は閉じない）
+  // POST・PATCH の完了後に呼び、次の型選択を受け付けられる状態にする
+  // Note: removeAllRanges() は省略している。
+  // contenteditable 要素がページ内にある環境で removeAllRanges() を呼ぶと選択範囲のテキストが DOM から消える場合があるため。
+  #resetToolbarTypeSelection() {
+    this.#toolbarFocusedType = null
+    this.toolbarTarget.querySelectorAll("[data-type]").forEach(btn => {
+      btn.classList.remove("active")
+      btn.style.boxShadow = ""
+    })
   }
 
   #hideEditPopup() {
     this.editPopupTarget.classList.add("d-none")
     // 編集状態をすべてリセットする
     this.#activeAnnotations = {}
-    this.#editStart = null
-    this.#editEnd   = null
+    this.#focusedType = null
+    this.#editStart   = null
+    this.#editEnd     = null
   }
 
+  // annotation を DOM に描画し、作成した span 要素を返す
   #renderAnnotation(annotation) {
     const range = this.#offsetToRange(
       this.bodyTarget, annotation.start_position, annotation.end_position
     )
-    if (!range) return
+    if (!range) return null
 
     const span = document.createElement("span")
     span.classList.add(`annotation-${annotation.annotation_type}`)
@@ -453,24 +591,38 @@ export default class extends Controller {
       if (annotation.annotation_type === "highlight") {
         span.style.backgroundColor = annotation.color
       } else {
-        span.style.borderBottomColor = annotation.color
+        // アンダーラインはスウォッチ色をそのまま使うと細い線では薄く見えるため、暗くした色を適用する
+        span.style.borderBottomColor = underlineColor(annotation.color)
       }
     }
 
-    try {
-      // 選択範囲が単一テキストノード内に収まる場合はこちら
-      range.surroundContents(span)
-    } catch (e) {
-      // 選択範囲が複数ノードをまたぐ場合（例：既存 span の境界）は
-      // extractContents で中身を取り出して span に入れてから挿入する
+    const startParent = range.startContainer.nodeType === Node.TEXT_NODE
+      ? range.startContainer.parentElement
+      : range.startContainer
+    const endParent = range.endContainer.nodeType === Node.TEXT_NODE
+      ? range.endContainer.parentElement
+      : range.endContainer
+
+    const insideExisting = !!(startParent.dataset.annotationId && startParent === endParent)
+
+    if (insideExisting) {
       const fragment = range.extractContents()
       span.appendChild(fragment)
-      range.insertNode(span)
+      startParent.appendChild(span)
+    } else {
+      try {
+        range.surroundContents(span)
+      } catch (e) {
+        const fragment = range.extractContents()
+        span.appendChild(fragment)
+        range.insertNode(span)
+      }
     }
+
+    return span
   }
 
-  // TreeWalker でテキストノードを順に走査し、targetNode に到達するまでの
-  // 文字数を累積することで、DOM 上の位置を「文字オフセット」に変換する
+  // TreeWalker でテキストノードを順に走査し、targetNode に到達するまでの文字数を累積することで、DOM 上の位置を「文字オフセット」に変換する
   #getTextOffset(container, targetNode, targetOffset) {
     let offset = 0
     const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT)
@@ -482,8 +634,11 @@ export default class extends Controller {
   }
 
   // #getTextOffset の逆：文字オフセット（start/end）を DOM の Range に変換する
-  // TreeWalker でテキストノードを走査し、累積長が start/end を超えた時点で
-  // setStart / setEnd を呼ぶ
+  // TreeWalker でテキストノードを走査し、累積長が start/end を超えた時点で setStart / setEnd を呼ぶ
+  //
+  // 注意：start 判定は >= ではなく > を使う。
+  // surroundContents でテキストノードが分割されると、split 前の末尾ノードの累積長が start とぴったり一致する場合がある。このとき >= で判定すると、span の外にあるノードの末尾（= span の直前）を開始点に設定してしまい、次に同位置へ別の型のアノテーションを追加しようとすると挿入位置がズレる。
+  // > にすることで、境界ぴったりの場合は次のノード（span 内テキストノードの先頭）を開始点として使う。
   #offsetToRange(container, start, end) {
     const range = document.createRange()
     let offset = 0
@@ -494,7 +649,7 @@ export default class extends Controller {
       const node = walker.currentNode
       const len  = node.length
 
-      if (!startSet && offset + len >= start) {
+      if (!startSet && offset + len > start) {
         range.setStart(node, start - offset)
         startSet = true
       }
@@ -505,6 +660,22 @@ export default class extends Controller {
       offset += len
     }
     return null
+  }
+
+  // 選択範囲 [start, end] が spans の和集合で完全にカバーされているか判定する
+  // spans を開始位置でソートし、先頭から順に「ここまでカバー済み」を伸ばしていく
+  // 途中でギャップ（カバーされていない箇所）が見つかれば false を返す
+  #isFullyCovered(start, end, spans) {
+    const sorted = spans
+      .map(s => ({ start: parseInt(s.dataset.startPosition), end: parseInt(s.dataset.endPosition) }))
+      .sort((a, b) => a.start - b.start)
+    let covered = start
+    for (const s of sorted) {
+      if (s.start > covered) return false  // ギャップあり
+      covered = Math.max(covered, s.end)
+      if (covered >= end) return true
+    }
+    return covered >= end
   }
 }
 ```
