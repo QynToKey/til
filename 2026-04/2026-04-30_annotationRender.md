@@ -310,16 +310,11 @@ export default class extends Controller {
       return
     }
 
-    // span の下端を基準にポップアップを配置する
-    // getBoundingClientRect().bottom でフォントサイズ・行高さ・アンダーラインを自動的に考慮できる
+    // span の上端を基準にポップアップを配置する（ツールバーと表示位置を統一）
+    // d-none を先に外して offsetHeight を確定させてから top を計算する（ツールバーと同じ方式）
     const anySpan = Object.values(this.#activeAnnotations)[0]
     const rect    = anySpan.getBoundingClientRect()
     const popup   = this.editPopupTarget
-    popup.style.position  = "absolute"
-    popup.style.top       = `${rect.bottom + window.scrollY + 16}px`
-    popup.style.left      = `${rect.left + window.scrollX + rect.width / 2}px`
-    popup.style.transform = "translateX(-50%)"
-
     // 初期状態はどちらの型も非アクティブ（ユーザーが選択してから編集を始める）
     // Bootstrap が outline を上書きするため、box-shadow インラインスタイルをリセットする
     this.editPopupTarget.querySelectorAll("[data-popup-action='type']").forEach(btn => {
@@ -327,6 +322,10 @@ export default class extends Controller {
       btn.style.boxShadow = ""
     })
     popup.classList.remove("d-none")
+    popup.style.position  = "absolute"
+    popup.style.top       = `${rect.top + window.scrollY - popup.offsetHeight - 8}px`
+    popup.style.left      = `${rect.left + window.scrollX + rect.width / 2}px`
+    popup.style.transform = "translateX(-50%)"
   }
 
   // コントローラー要素の外をクリックしたらポップアップとツールバーを閉じる
@@ -519,11 +518,11 @@ export default class extends Controller {
         btn.classList.remove("active")
         btn.style.boxShadow = ""
       })
+      popup.classList.remove("d-none")
       popup.style.position  = "absolute"
-      popup.style.top       = `${popupRect.bottom + window.scrollY + 16}px`
+      popup.style.top       = `${popupRect.top + window.scrollY - popup.offsetHeight - 8}px`
       popup.style.left      = `${popupRect.left + window.scrollX + popupRect.width / 2}px`
       popup.style.transform = "translateX(-50%)"
-      popup.classList.remove("d-none")
       return
     }
 
@@ -852,4 +851,4 @@ tion"
 
 ---
 
-##### 総学習時間： 1276.9 時間
+##### 総学習時間： 1286.3 時間
