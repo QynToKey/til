@@ -251,7 +251,11 @@ export default class extends Controller {
           const newSpan = this.#renderAnnotation({ ...data, start_position: start, end_position: end, color })
           // 作成した span を記録しておく（2周目以降で PATCH に切り替えるため）
           if (newSpan) this.#toolbarAnnotations[type] = newSpan
-          this.#resetToolbarTypeSelection()
+
+          // #hideToolbar() は #toolbarAnnotations をリセットするため、先にコピーを取る
+          const savedAnnotations = { ...this.#toolbarAnnotations }
+          this.#hideToolbar()
+          this.#showPopupForAnnotations(start, end, savedAnnotations)
         }
       })
     }
@@ -570,6 +574,29 @@ export default class extends Controller {
     this.#focusedType = null
     this.#editStart   = null
     this.#editEnd     = null
+  }
+
+  // アノテーション作成直後にポップアップへ切り替える
+  // 作成した span を activeAnnotations として登録し、クリック時と同じ編集フローに乗せる
+  #showPopupForAnnotations(start, end, annotations) {
+    this.#activeAnnotations = annotations
+    this.#focusedType = null
+    this.#editStart   = start
+    this.#editEnd     = end
+
+    this.editPopupTarget.querySelectorAll("[data-popup-action='type']").forEach(btn => {
+      btn.classList.remove("active")
+      btn.style.boxShadow = ""
+    })
+
+    const anySpan = Object.values(annotations)[0]
+    const rect    = anySpan.getBoundingClientRect()
+    const popup   = this.editPopupTarget
+    popup.classList.remove("d-none")
+    popup.style.position  = "absolute"
+    popup.style.top       = `${rect.top + window.scrollY - popup.offsetHeight - 8}px`
+    popup.style.left      = `${rect.left + window.scrollX + rect.width / 2}px`
+    popup.style.transform = "translateX(-50%)"
   }
 
   // annotation を DOM に描画し、作成した span 要素を返す
