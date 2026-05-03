@@ -247,7 +247,7 @@ $ docker compose exec web bin/rails db:migrate
 
 ---
 
-## 6️⃣ `test_selection_controller.js` を更新
+## 6️⃣ `text_selection_controller.js` を更新
 
 ### `#renderAnnotation` — `data-fill-style` / `data-color` の追加と outline 描画
 
