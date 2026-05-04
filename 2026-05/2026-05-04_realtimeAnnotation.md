@@ -1,4 +1,4 @@
-# [co-READER](https://github.com/QynToKey/co_reader)（day: 26_1）：Hotwire
+# [co-READER](https://github.com/QynToKey/co_reader)（day: 26_1）： 書き込みのリアルタイム反映
 
 ## 0️⃣ Hotwire について
 
@@ -45,3 +45,7 @@
 | 既存コードの流用 | できない | できる |
 
 👉 *「Hotwire のうち ActionCable の部分を使い、Stimulus で処理する」設計を採用し、最小限の変更で「リアルタイム反映」を達成する*
+
+---
+
+## 1️⃣
